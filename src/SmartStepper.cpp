@@ -57,7 +57,7 @@ void SmartStepper::TICK(void) {
         stepper->internTick();
     }
     
-    uint16_t delta = CPU_CLK_FREQ / SmartStepper::TICK_INTERRUPT_FREQ;
+    uint32_t delta = CPU_CLK_FREQ / SmartStepper::TICK_INTERRUPT_FREQ;
     timer0_write(ESP.getCycleCount()+delta); 
 }
 
@@ -67,15 +67,10 @@ void SmartStepper::internTick() {
     float stepsPerSecond = speed * stepsPerTurn;
     float res = resolutionToSteps() * SmartStepper::TICK_INTERRUPT_FREQ;
 
-    uint16_t mod = max((uint16_t)(res/stepsPerSecond), (uint16_t)1);
+    uint32_t mod = max((uint16_t)(res/stepsPerSecond), (uint16_t)1);
 
     if(timerCount % mod == 0) doStep();
-
-    if(timerCount >= SmartStepper::TICK_INTERRUPT_FREQ) {
-        timerCount = 0;
-        debugMessage("halfMSPerTotlaDoStep: " + String(res/stepsPerSecond));
-        debugMessage(getDebugMessage());
-    }
+    if(timerCount >= SmartStepper::TICK_INTERRUPT_FREQ) timerCount = 0;
 }
 
 steps_t SmartStepper::resolutionToSteps() {
@@ -97,7 +92,7 @@ void SmartStepper::doStep() {
 
     if(target_steps == steps) return;
     
-    direction = (target_steps > steps) ? DIRECTION::FORWARD : DIRECTION::BACKWARD;
+    setDirection((target_steps > steps) ? DIRECTION::FORWARD : DIRECTION::BACKWARD);
 
     setSleepState(AWAKE);
 
@@ -126,7 +121,8 @@ void SmartStepper::setSpeed(speed_t setSpeed) {
 }
 
 speed_t SmartStepper::getMaxSpeed() {
-    return resolutionToSteps() * SmartStepper::TICK_INTERRUPT_FREQ / stepsPerTurn;
+    speed_t technical_possible = resolutionToSteps() * SmartStepper::TICK_INTERRUPT_FREQ / stepsPerTurn;
+    return min(technical_possible, (speed_t)20);
 }
 
 void SmartStepper::setResolution(MICROSTEPRESOLUTION setRes) {
@@ -139,12 +135,18 @@ void SmartStepper::setStepsPerTurn(steps_t setSPT) {
     setSpeed(speed);
 }
 
+void SmartStepper::setDirection(DIRECTION setDir) { 
+    digitalWrite(pinDirection, ((setDir == DIRECTION::FORWARD) ? LOW : HIGH));
+    direction = setDir; 
+}
+
 void SmartStepper::rotate(angle_t angle) {
     setTargetSteps(steps + angle / 360 * stepsPerTurn);
+    debugMessage("Rotate " + String(angle) + "°");
 }
 
 void SmartStepper::waitUntilTargetReached() {
-    while(fabs(target_steps - steps) < resolutionToSteps()) yield();
+    while(fabs(target_steps - steps) > resolutionToSteps()) yield();
     return;
 }
 

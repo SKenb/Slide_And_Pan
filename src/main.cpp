@@ -38,18 +38,18 @@ void setup() {
   slideStepper->setStepsPerTurn(200);
   slideStepper->setResolution(MICROSTEPRESOLUTION::SIXTEENTH);
 
-  slideStepper->setSpeed(5);
-  slideStepper->rotate(720000);
+  slideStepper->setSpeed(1);
+  slideStepper->rotate(720);
+
+  slideStepper->waitUntilTargetReached();
+
+  delay(1000);
+
+  slideStepper->setSpeed(0.5);
+  slideStepper->rotate(-720);
 }
 
 void loop() {
   serverRoutine();
 
-  /*for(int speed = 1; speed <= 50; speed++) {
-    slideStepper->setSpeed(((speed_t)speed)/10);
-    
-    if(speed % 10 == 0) debugMessage("Speed set to: " + String(slideStepper->getSpeed()));
-    delay(100);
-    //slideStepper->waitUntilTargetReached();
-  }*/
 }

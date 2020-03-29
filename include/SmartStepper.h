@@ -41,10 +41,10 @@ class SmartStepper
         static std::vector<SmartStepper*> steppers;
         static void INIT_TIMER(void);
         static void TICK(void);
-        static const uint16_t TICK_INTERRUPT_FREQ = 2*10000;
+        static const uint32_t TICK_INTERRUPT_FREQ = 2*10000;
         
         steps_t resolutionToSteps();
-        uint16_t timerCount;
+        uint32_t timerCount;
 
 
         void internTick();
@@ -60,7 +60,7 @@ class SmartStepper
 
         bool isSleeping() { return sleepState == SLEEPSTATE::SLEEP; }
 
-        void setDirection(DIRECTION setDir) { direction = setDir; }
+        void setDirection(DIRECTION setDir);
         
         void setResolution(MICROSTEPRESOLUTION setRes);
 

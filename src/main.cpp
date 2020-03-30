@@ -36,17 +36,12 @@ void setup() {
 
   slideStepper = new SmartStepper(STEPPER_A_DIR_PIN, STEPPER_A_STEP_PIN, STEPPER_A_SLEEP_PIN);
   slideStepper->setStepsPerTurn(200);
-  slideStepper->setResolution(MICROSTEPRESOLUTION::SIXTEENTH);
+  slideStepper->setResolution(MICROSTEPRESOLUTION::FULL);
 
-  slideStepper->setSpeed(1);
-  slideStepper->rotate(720);
 
-  slideStepper->waitUntilTargetReached();
-
-  delay(1000);
-
-  slideStepper->setSpeed(0.5);
-  slideStepper->rotate(-720);
+  slideStepper->setTargetAccerlaration(1);
+  slideStepper->setTargetSpeed(10);
+  slideStepper->rotate(3600000);
 }
 
 void loop() {

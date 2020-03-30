@@ -13,7 +13,10 @@ SmartStepper::SmartStepper(pin_t setDirectionPin, pin_t setStepPin, pin_t setSle
     pinMode(pinSleep, OUTPUT);
 
     speedMin = .01;
-    setSpeed(1);
+    setTargetSpeed(1);
+    setSpeed(0);
+
+    setTargetAccerlaration(1);
 
     //ticker.attach_ms_scheduled(1, [this](){ this->tick(); });
 
@@ -39,6 +42,7 @@ SmartStepper::~SmartStepper()
 }
 
 std::vector<SmartStepper*> SmartStepper::steppers;
+time_count_t SmartStepper::tickDeltaCount = 0;
 
 void SmartStepper::INIT_TIMER(void) {
 
@@ -53,24 +57,42 @@ void SmartStepper::INIT_TIMER(void) {
 
 void SmartStepper::TICK(void) {
     
+    time_count_t start = ESP.getCycleCount();
+
     for(SmartStepper* stepper : SmartStepper::steppers) {
         stepper->internTick();
     }
     
-    uint32_t delta = CPU_CLK_FREQ / SmartStepper::TICK_INTERRUPT_FREQ;
+    time_count_t delta = CPU_CLK_FREQ / SmartStepper::TICK_INTERRUPT_FREQ;
+
+    SmartStepper::tickDeltaCount = ESP.getCycleCount() - start;
+
     timer0_write(ESP.getCycleCount()+delta); 
 }
 
 void SmartStepper::internTick() {
     timerCount++;
+    
+    setAccelaration();
+    if(fabs(accerlaration) > 0) {
+        accelaration_t accelarationPerTick = accerlaration / SmartStepper::TICK_INTERRUPT_FREQ;
+        setSpeed(speed + accelarationPerTick);
+    }
 
+    if((timerCount) % speedModulo == 0) doStep();
+    
+    if(timerCount % (SmartStepper::TICK_INTERRUPT_FREQ) == 0) {
+        debugMessage("Speed: " + String(speed) + "\tTarget speed: " + String(targetSpeed) + "\tTimer: " + String(timerCount) + "\ttickDelta: " + String(SmartStepper::tickDeltaCount) + "\tmod: " + String(speedModulo));
+    }
+
+    if(timerCount >= SmartStepper::TICK_INTERRUPT_FREQ) timerCount = 0;
+}
+
+void SmartStepper::setSpeedModulo() {
     float stepsPerSecond = speed * stepsPerTurn;
     float res = resolutionToSteps() * SmartStepper::TICK_INTERRUPT_FREQ;
-
-    uint32_t mod = max((uint16_t)(res/stepsPerSecond), (uint16_t)1);
-
-    if(timerCount % mod == 0) doStep();
-    if(timerCount >= SmartStepper::TICK_INTERRUPT_FREQ) timerCount = 0;
+    
+    speedModulo = max((time_count_t)(round(res/stepsPerSecond)), (time_count_t)1);
 }
 
 steps_t SmartStepper::resolutionToSteps() {
@@ -87,12 +109,32 @@ steps_t SmartStepper::resolutionToSteps() {
     }
 }
 
+
+void SmartStepper::setAccelaration() {
+    accerlaration = 0;
+
+    speed_t curentTargetSpeed = targetSpeed;
+    steps_t delta_steps = fabs(targetSteps - steps);
+    if((speed * speed * (2*stepsPerTurn) / (2 * targetAccerlaration)) >= delta_steps) curentTargetSpeed = 0;
+
+    speed_t delta_speed = curentTargetSpeed - speed;
+    if(fabs(delta_speed) < speedMin) {
+        setSpeed(targetSpeed);
+    }
+    else {
+        accerlaration = (delta_speed > 0) ? targetAccerlaration : (-1 * targetAccerlaration);
+    }
+
+    //if(timerCount % 2000 == 0)
+    //    debugMessage("Speed: " + String(speed) + "\tTarget speed: " + String(targetSpeed) + "\tDelta steps: " + String(delta_steps) + "\tAcc: " + String(accerlaration));
+    
+}
+
 void SmartStepper::doStep() {
 
-
-    if(target_steps == steps) return;
+    if(targetSteps == steps) return;
     
-    setDirection((target_steps > steps) ? DIRECTION::FORWARD : DIRECTION::BACKWARD);
+    setDirection((targetSteps > steps) ? DIRECTION::FORWARD : DIRECTION::BACKWARD);
 
     setSleepState(AWAKE);
 
@@ -101,13 +143,13 @@ void SmartStepper::doStep() {
 
     steps_t made_steps = resolutionToSteps();
     steps += ((direction == DIRECTION::FORWARD) ? made_steps : -made_steps);
-}
 
+}
 
 void SmartStepper::setTargetSteps(steps_t setTargetSteps) {
     steps_t resolution = resolutionToSteps();
 
-    target_steps = setTargetSteps - fmod(setTargetSteps, resolution);
+    targetSteps = setTargetSteps - fmod(setTargetSteps, resolution);
 }
 
 void SmartStepper::setSleepState(SLEEPSTATE setState) {
@@ -116,8 +158,18 @@ void SmartStepper::setSleepState(SLEEPSTATE setState) {
 }
 
 void SmartStepper::setSpeed(speed_t setSpeed) { 
-    speed = min(max(setSpeed, speedMin), getMaxSpeed()); 
-    debugMessage("SmartStepper: Speed set to: " + String(speed) + "( <= " + String(getMaxSpeed()) + ")");
+    speed = min(max(setSpeed, speedMin), getMaxSpeed());
+    setSpeedModulo();
+}
+
+void SmartStepper::setTargetSpeed(speed_t setTargetSpeed) {
+    targetSpeed = min(max(setTargetSpeed, speedMin), getMaxSpeed());
+}
+
+void SmartStepper::setTargetAccerlaration(accelaration_t setAcc) {
+    accelaration_t minAcc = 0.1;
+    accelaration_t maxAcc = 2;
+    targetAccerlaration = min(max(setAcc, minAcc), maxAcc);
 }
 
 speed_t SmartStepper::getMaxSpeed() {
@@ -146,11 +198,11 @@ void SmartStepper::rotate(angle_t angle) {
 }
 
 void SmartStepper::waitUntilTargetReached() {
-    while(fabs(target_steps - steps) > resolutionToSteps()) yield();
+    while(fabs(targetSteps - steps) > resolutionToSteps()) yield();
     return;
 }
 
 String SmartStepper::getDebugMessage() {
     return "SmartStepper: Steps:" + String(steps, '\004') 
-            + "\tTarget stpes: " + String(target_steps, '\004');
+            + "\tTarget stpes: " + String(targetSteps, '\004');
 }

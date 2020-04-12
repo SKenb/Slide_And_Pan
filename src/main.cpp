@@ -14,17 +14,37 @@ pin_t clockPin = WD6;
 pin_t dataOutPin = WD0; //WD7;
 
 pin_t dataInPin = WD7;
-pin_t clockEnPin = WD8;
+pin_t latchInPin = WD8;
 
 SmartStepper* slideStepper;
 IOBoard* ioBoard;
+float rotation = 0; 
+unsigned int dir = 0;
+unsigned int prevClk = 0;
 
-void timerSetup() {
-  /*noInterrupts();
-  timer0_isr_init();
-  timer0_attachInterrupt(timer0_ISR);
-  timer0_write(ESP.getCycleCount() + 80000000L); // 80MHz == 1sec
-  interrupts();*/
+void setupIOBoard() {
+  ioBoard = new IOBoard(latchPin, clockPin, dataOutPin, 16,
+                        latchInPin, dataInPin, 8);
+
+  ioBoard->enableAutoRead(1);
+  ioBoard->addOnPortChangeHandler(4, [](ioport_level_t level){ debugMessage("Toggled switch: " + String(level) + "\tRotation: " + String(rotation)); });
+  ioBoard->addOnChangeHandler([ioBoard](unsigned int changed_values){ 
+
+    ioport_level_t direction = ioBoard->getInputState(3);
+    ioport_level_t clk = ioBoard->getInputState(2);
+
+    if(clk && !prevClk) rotation += direction ? -1 : 1;
+    if(!clk && prevClk) rotation += direction ? 1 : -1;
+    
+    prevClk = clk;
+  });
+}
+
+void setupSmartSteppers() {
+  slideStepper = new SmartStepper(WD1, WD2, WD3);
+  slideStepper->setStepsPerTurn(200);
+  slideStepper->setResolution(MICROSTEPRESOLUTION::SIXTEENTH);
+  slideStepper->setTargetSpeed(1);
 }
 
 void setup() {
@@ -36,57 +56,17 @@ void setup() {
   
   digitalWrite(PIN_LED_GREEN, LOW);
   digitalWrite(PIN_LED_RED, LOW);
-*/
+  initSteppers();
+  serverSetup();*/
+
   debugSetup();
-  /*initSteppers();
-  serverSetup();
-  timerSetup();*/
+  setupIOBoard();
+  setupSmartSteppers();
 
-
-  pinMode(dataInPin, INPUT);
-  pinMode(clockEnPin, OUTPUT);
-
-  ioBoard = new IOBoard(latchPin, clockPin, dataOutPin, 16);
+  slideStepper->rotate(360);
 }
 
 void loop() {
   //serverRoutine();
-
-  /*while(1) {
-
-    ioBoard->toggleAndApplyOutput(1);
-    delay(1000);
-
-    ioBoard->setAndApplyOutput(14, HIGH);
-    delay(1000);
-    ioBoard->setAndApplyOutput(14, LOW);
-    delay(1000);
-    ioBoard->setAndApplyOutput(15, HIGH);
-    delay(1000);
-    ioBoard->setAndApplyOutput(15, LOW);
-    delay(1000);
-    ioBoard->setOutput(14, HIGH);
-    ioBoard->setOutput(15, HIGH);
-    ioBoard->applyOutputState();
-    delay(1000);
-    ioBoard->setAndApplyOutput(14, LOW);
-    delay(1000);
-    ioBoard->setAndApplyOutput(15, LOW);
-
-    delay(1000);
-  }*/
-
-  while(1) {
-
-    digitalWrite(latchPin, HIGH);
-    digitalWrite(latchPin, LOW);
-    delay(1);
-    digitalWrite(latchPin, HIGH);
-    
-    digitalWrite(clockEnPin, LOW);
-    debugMessage("Read: " + String(shiftIn(dataInPin, clockPin, MSBFIRST)));
-    digitalWrite(clockEnPin, HIGH);
-
-    delay(1000);
-  }
+  slideStepper->rotateToAbsoluteAngle(rotation*45);
 }

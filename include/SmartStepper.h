@@ -10,7 +10,7 @@ typedef float steps_t;
 typedef float turns_t;
 typedef float angle_t;
 typedef float speed_t;
-typedef float accelaration_t;
+typedef float acceleration_t;
 typedef uint32_t time_count_t;
 
 enum SLEEPSTATE { SLEEP, AWAKE };
@@ -41,8 +41,8 @@ class SmartStepper
         speed_t speedMin;
         speed_t targetSpeed;
 
-        accelaration_t accerlaration;
-        accelaration_t targetAccerlaration;
+        acceleration_t acceleration;
+        acceleration_t targetAcceleration;
 
         static std::vector<SmartStepper*> steppers;
         static void INIT_TIMER(void);
@@ -57,7 +57,7 @@ class SmartStepper
         void internTick();
         void setSpeedModulo();
         void doStep();
-        void setAccelaration();
+        void setAcceleration();
         void setTargetSteps(steps_t setTargetSteps);
         void setSleepState(SLEEPSTATE setState);
         void setSpeed(speed_t setSpeed);
@@ -79,13 +79,14 @@ class SmartStepper
         speed_t getSpeed() { return speed; }
         speed_t getMaxSpeed();
 
-        void setTargetAccerlaration(accelaration_t setAcc);
+        void setTargetAcceleration(acceleration_t setAcc);
 
         turns_t getTurns() { return steps / stepsPerTurn; }
 
         angle_t getAngle() { return getTurns() * 360; }
 
         void rotate(angle_t angle);
+        void rotateToAbsoluteAngle(angle_t angle);
 
         String getDebugMessage();
 

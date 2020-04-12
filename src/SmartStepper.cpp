@@ -22,7 +22,6 @@ SmartStepper::SmartStepper(pin_t setDirectionPin, pin_t setStepPin, pin_t setSle
 
     timerCount = 0;
     if(SmartStepper::steppers.size() <= 0) {
-        digitalWrite(PIN_LED_RED, HIGH);
         SmartStepper::INIT_TIMER();
     }
 

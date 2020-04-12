@@ -10,6 +10,17 @@
 #define LONG_MAX 2147483647L
 #define LONG_MIN -2147483648L
 
-#define PIN_LED_RED 14
-#define PIN_LED_GREEN 16
+#define WD1 5
+#define WD2 4
+#define WD3 0
+#define WD4 2
+#define WTX 1
+#define WRX 3
+#define WD0 16
+#define WD5 14
+#define WD6 12
+#define WD7 13
+#define WD8 15
+
+typedef unsigned int pin_t;
 

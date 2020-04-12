@@ -6,7 +6,6 @@
 #include "common.h"
 #include "debug.h"
 
-typedef unsigned int pin_t;
 typedef float steps_t;
 typedef float turns_t;
 typedef float angle_t;

@@ -12,9 +12,13 @@ SmartStepper::SmartStepper(pin_t setDirectionPin, pin_t setStepPin, pin_t setSle
     pinMode(pinStep, OUTPUT);
     pinMode(pinSleep, OUTPUT);
 
+    setChangeResolutionMethod(nullptr);
+
     speedMin = .01;
     setTargetSpeed(1);
     setSpeed(0);
+
+    setResolution(MICROSTEPRESOLUTION::SIXTEENTH);
 
     setTargetAcceleration(1);
 
@@ -81,9 +85,9 @@ void SmartStepper::internTick() {
 
     if((timerCount) % speedModulo == 0) doStep();
     
-    if(timerCount % (SmartStepper::TICK_INTERRUPT_FREQ) == 0) {
-        debugMessage("Speed: " + String(speed) + "\tTarget speed: " + String(targetSpeed) + "\tDelta-steps: " + String(steps - targetSteps) + "\tTimer: " + String(timerCount) + "\tAcc: " + String(acceleration));
-    }
+    /*if(timerCount % (SmartStepper::TICK_INTERRUPT_FREQ) == 0) {
+        debugMessage("Speed: " + String(speed) + "\tTarget speed: " + String(targetSpeed) + "\tDelta-steps: " + String(steps - targetSteps) + "\tTimer: " + String(timerCount) + "\tRes: " + String(resolution));
+    }*/
 
     if(timerCount >= SmartStepper::TICK_INTERRUPT_FREQ) timerCount = 0;
 }
@@ -107,6 +111,29 @@ steps_t SmartStepper::resolutionToSteps() {
             debugError("Resolution not known!"); 
             return 0;
     }
+}
+
+void SmartStepper::setChangeResolutionMethod(std::function<void (MICROSTEPRESOLUTION)> setChangeResolutionMethod) {
+    changeResolutionMethod = setChangeResolutionMethod;
+}
+
+
+void SmartStepper::setIdealResolutionIfPossible() {
+    if(changeResolutionMethod) {
+        MICROSTEPRESOLUTION resolution = calculateIdealResolutionFromSpeed();
+        changeResolutionMethod(resolution);
+        setResolution(resolution);
+    }
+}
+
+MICROSTEPRESOLUTION SmartStepper::calculateIdealResolutionFromSpeed() {
+    if(speed >= 2) return MICROSTEPRESOLUTION::FULL;
+    else if(speed >= 1) return MICROSTEPRESOLUTION::HALF;
+    else if(speed >= .5) return MICROSTEPRESOLUTION::QUARTER;
+    else if(speed >= .25) return MICROSTEPRESOLUTION::EIGHTH;
+    else if(speed >= .125) return MICROSTEPRESOLUTION::SIXTEENTH;
+
+    return MICROSTEPRESOLUTION::SIXTEENTH;
 }
 
 
@@ -179,6 +206,8 @@ speed_t SmartStepper::getMaxSpeed() {
 
 void SmartStepper::setResolution(MICROSTEPRESOLUTION setRes) {
     resolution = setRes;
+    if(changeResolutionMethod) changeResolutionMethod(setRes);
+
     setSpeed(speed);
 }
 
@@ -209,4 +238,65 @@ void SmartStepper::waitUntilTargetReached() {
 String SmartStepper::getDebugMessage() {
     return "SmartStepper: Steps:" + String(steps, '\004') 
             + "\tTarget stpes: " + String(targetSteps, '\004');
+}
+
+
+String SmartStepper::toJson(String myName, String tabString) {
+    String json = "{\n";
+    String myTabString = tabString + "\t";
+
+    jsonAddField(json, "Name", myName, myTabString, true);
+    jsonAddField(json, "Hardware", hardwareJson(myTabString), myTabString);
+    jsonAddField(json, "Position", postionJson(myTabString), myTabString);
+    jsonAddField(json, "Speed", speedJson(myTabString), myTabString);
+    jsonAddField(json, "Acceleration", accJson(myTabString), myTabString, false, true);
+
+    return json + "}";
+}
+
+String SmartStepper:: hardwareJson(String tabString) {
+    String json = "{\n";
+    String myTabString = tabString + "\t";
+
+    jsonAddField(json, "DirectionPin", String(pinDirection), myTabString, true);
+    jsonAddField(json, "StepPin", String(pinStep), myTabString, true);
+    jsonAddField(json, "SleepPin", String(pinSleep), myTabString, true);
+    jsonAddField(json, "StepsPerTurn", String(stepsPerTurn), myTabString);
+    jsonAddField(json, "Resolution", "1/" + String(1/resolutionToSteps()), myTabString, true);
+    jsonAddField(json, "Sleep", sleepState == SLEEPSTATE::AWAKE ? "false" : "true", myTabString);
+    jsonAddField(json, "CanChangeResolution", changeResolutionMethod == nullptr ? "false" : "true", myTabString, false, true);
+
+    return json + tabString + "}";
+}
+
+String SmartStepper:: postionJson(String tabString){
+    String json = "{\n";
+    String myTabString = tabString + "\t";
+
+    jsonAddField(json, "Steps", String(steps), myTabString);
+    jsonAddField(json, "TargetSteps", String(targetSteps), myTabString);
+    jsonAddField(json, "Direction", String(direction == DIRECTION::BACKWARD ? "Backward" : "Forward"), myTabString, true, true);
+
+    return json + tabString + "}";
+}
+
+String SmartStepper:: speedJson(String tabString) {
+    String json = "{\n";
+    String myTabString = tabString + "\t";
+
+    jsonAddField(json, "Speed", String(speed), myTabString);
+    jsonAddField(json, "TargetSpeed", String(targetSpeed), myTabString);
+    jsonAddField(json, "Min", String(speedMin), myTabString);
+    jsonAddField(json, "Max", String(getMaxSpeed()), myTabString, false, true);
+
+    return json + tabString + "}";
+}
+
+String SmartStepper:: accJson(String tabString) {
+    String json = "{\n";
+    String myTabString = tabString + "\t";
+
+    jsonAddField(json, "Acceleration", String(acceleration), myTabString);
+    jsonAddField(json, "TargetAcceleration", String(targetAcceleration), myTabString, false, true);
+    return json + tabString + "}";
 }

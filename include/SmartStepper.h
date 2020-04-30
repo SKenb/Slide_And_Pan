@@ -30,7 +30,8 @@ class SmartStepper
         DIRECTION direction;
 
         MICROSTEPRESOLUTION resolution;
-
+        std::function<void (MICROSTEPRESOLUTION)> changeResolutionMethod;
+        
         steps_t stepsPerTurn;
         steps_t steps;
         steps_t targetSteps;
@@ -61,6 +62,13 @@ class SmartStepper
         void setTargetSteps(steps_t setTargetSteps);
         void setSleepState(SLEEPSTATE setState);
         void setSpeed(speed_t setSpeed);
+        void setIdealResolutionIfPossible();
+        MICROSTEPRESOLUTION calculateIdealResolutionFromSpeed();
+
+        String hardwareJson(String tabString);
+        String postionJson(String tabString);
+        String speedJson(String tabString);
+        String accJson(String tabString);
         
     public:
 
@@ -72,6 +80,8 @@ class SmartStepper
         void setDirection(DIRECTION setDir);
         
         void setResolution(MICROSTEPRESOLUTION setRes);
+
+        void setChangeResolutionMethod(std::function<void (MICROSTEPRESOLUTION)> setChangeResolutionMethod);
 
         void setStepsPerTurn(steps_t setSPT);
 
@@ -91,6 +101,8 @@ class SmartStepper
         String getDebugMessage();
 
         void waitUntilTargetReached();
+
+        String toJson(String myName, String tabString);
 };
 
 #endif

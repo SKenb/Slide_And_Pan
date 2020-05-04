@@ -13,6 +13,7 @@ void setupSteppers() {
   slideStepper->setResolution(MICROSTEPRESOLUTION::QUARTER);
   slideStepper->setStepsPerTurn(STEPPER_STEPS_PER_TURN);
   slideStepper->setTargetSpeed(2);
+  slideStepper->setName("slideStepper");
 #endif
 
 #ifdef PAN
@@ -23,6 +24,7 @@ void setupSteppers() {
   panStepper->setResolution(MICROSTEPRESOLUTION::QUARTER);
   panStepper->setStepsPerTurn(STEPPER_STEPS_PER_TURN);
   panStepper->setTargetSpeed(2);
+  panStepper->setName("panStepper");
 #endif
 
 }

@@ -4,6 +4,8 @@ SmartStepper::SmartStepper(pin_t setDirectionPin, pin_t setStepPin, pin_t setSle
 {
     debugMessage("SmartStepper: new Stepper (current #" + String(SmartStepper::steppers.size()) + ")");
 
+    name = "<NOT SPECIFIED>";
+
     pinDirection = setDirectionPin;
     pinSleep = setSleepPin;
     pinStep = setStepPin;
@@ -12,13 +14,15 @@ SmartStepper::SmartStepper(pin_t setDirectionPin, pin_t setStepPin, pin_t setSle
     pinMode(pinStep, OUTPUT);
     pinMode(pinSleep, OUTPUT);
 
+    setResolution(MICROSTEPRESOLUTION::SIXTEENTH);
     setChangeResolutionMethod(nullptr);
+
+    steps = 0;
+    targetSteps = 0;
 
     speedMin = .01;
     setTargetSpeed(1);
     setSpeed(0);
-
-    setResolution(MICROSTEPRESOLUTION::SIXTEENTH);
 
     setTargetAcceleration(1);
 
@@ -37,7 +41,11 @@ SmartStepper::~SmartStepper()
     std::vector<SmartStepper*>::iterator it = SmartStepper::steppers.begin();
     while(it != SmartStepper::steppers.end()) {
         if(*it == this) {
-            SmartStepper::steppers.erase(it);
+            it = SmartStepper::steppers.erase(it);
+        }
+        else
+        {
+            it++;    
         }
     }
 
@@ -85,9 +93,9 @@ void SmartStepper::internTick() {
 
     if((timerCount) % speedModulo == 0) doStep();
     
-    /*if(timerCount % (SmartStepper::TICK_INTERRUPT_FREQ) == 0) {
-        debugMessage("Speed: " + String(speed) + "\tTarget speed: " + String(targetSpeed) + "\tDelta-steps: " + String(steps - targetSteps) + "\tTimer: " + String(timerCount) + "\tRes: " + String(resolution));
-    }*/
+    if(timerCount % (SmartStepper::TICK_INTERRUPT_FREQ) == 0) {
+
+    }
 
     if(timerCount >= SmartStepper::TICK_INTERRUPT_FREQ) timerCount = 0;
 }
@@ -152,9 +160,9 @@ void SmartStepper::setAcceleration() {
         acceleration = (delta_speed > 0) ? targetAcceleration : (-1 * targetAcceleration);
     }
 
-    //if(timerCount % 2000 == 0)
-    //    debugMessage("Speed: " + String(speed) + "\tTarget speed: " + String(targetSpeed) + "\tDelta steps: " + String(delta_steps) + "\tAcc: " + String(accerlaration));
-    
+    /*if(timerCount % 5000 == 0)
+        debugMessage("Speed: " + String(speed) + "\tTarget speed: " + String(targetSpeed) + "\tDelta steps: " + String(delta_steps) + "\tAcc: " + String(acceleration));
+    */
 }
 
 void SmartStepper::doStep() {

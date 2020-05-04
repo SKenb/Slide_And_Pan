@@ -21,6 +21,8 @@ class SmartStepper
 {
     private:
 
+        String name;
+
         pin_t pinDirection;
         pin_t pinStep;
         pin_t pinSleep;
@@ -103,6 +105,9 @@ class SmartStepper
         void waitUntilTargetReached();
 
         String toJson(String myName, String tabString);
+
+        void setName(String setName) { name = setName; }
+        String getName() { return name; }
 };
 
 #endif

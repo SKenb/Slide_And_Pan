@@ -37,4 +37,7 @@ void jsonAddField(String& json, String field, String value, String tabString, bo
 
 String getBasicDataJson(String tabString);
 
+
+void setStreamDataFunction(std::function<void (String)> setFunction);
+void tryStreamData(String data);
 #endif

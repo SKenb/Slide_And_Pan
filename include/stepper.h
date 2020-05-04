@@ -23,7 +23,7 @@
 #define SLIDE_STEPPER_DRIVER_M3 3
 #endif
 
-//#define PAN
+#define PAN
 #ifdef PAN
 #define PAN_STEPPER_PIN_DIRECTION WD4
 #define PAN_STEPPER_PIN_STEP WD4

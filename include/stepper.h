@@ -47,4 +47,6 @@ String panJsonData(String tabString);
 
 void genericChangeResolutionMethod(pin_t M1, pin_t M2, pin_t M3, MICROSTEPRESOLUTION resolution);
 
+String stepperHandleCommand(String command, String commandValue, String tabString);
+
 #endif

@@ -105,3 +105,46 @@ void genericChangeResolutionMethod(pin_t M1, pin_t M2, pin_t M3, MICROSTEPRESOLU
       break;
   }
 }
+
+String stepperHandleCommand(String command, String commandValue, String tabString = "") {
+  SmartStepper* stepper = nullptr;
+  
+  if(command.indexOf("slide") >= 0) stepper = getSlideStepper();
+
+  if(stepper == nullptr) return "";
+
+  String stepperCommandResult = tabString + "{\n";
+  String innerTabString = tabString + "\t";
+
+  if(command == COMMAND_SLIDE_SLEEP) {
+      stepper->setSleepState(((commandValue == "0") ? SLEEPSTATE::SLEEP : SLEEPSTATE::AWAKE));
+      jsonAddField(stepperCommandResult, "New Sleep State", ((commandValue == "0") ? "Sleeping" : "Awake"), innerTabString, true);
+  }
+
+  if(command == COMMAND_SLIDE_TO) {
+      stepper->rotateToAbsoluteAngle((angle_t)commandValue.toFloat());
+      jsonAddField(stepperCommandResult, "Rotation goal", String((angle_t)commandValue.toFloat()), innerTabString, false);
+  }
+
+  if(command == COMMAND_SLIDE_SET_SPEED) {
+      stepper->setTargetSpeed((speed_t)commandValue.toFloat());
+      jsonAddField(stepperCommandResult, "TargetSpeed set to", String((speed_t)commandValue.toFloat()), innerTabString, false);
+      jsonAddField(stepperCommandResult, "TargetSpeed is", String(stepper->getTargetSpeed()), innerTabString, false);
+  }
+
+  if(command == COMMAND_SLIDE_SET_ACC) {
+      stepper->setTargetAcceleration((acceleration_t)commandValue.toFloat());
+      jsonAddField(stepperCommandResult, "TargetAcceleration set to", String((acceleration_t)commandValue.toFloat()), innerTabString, false);
+      jsonAddField(stepperCommandResult, "TargetAcceleration is", String(stepper->getTargetAcceleration()), innerTabString, false);
+  }
+
+    if(command == COMMAND_SLIDE_SET_RESOLUTION) {
+      stepper->setResolutionFromInteger(commandValue.toInt());
+      jsonAddField(stepperCommandResult, "Resolution set to", "1/" + String(1/stepper->resolutionToSteps()), innerTabString, false);
+      jsonAddField(stepperCommandResult, "hasChangeResolutionMethod", String(stepper->hasChangeResolutionMethod()), innerTabString, false);
+  }
+
+  jsonAddField(stepperCommandResult, "Stepper", stepper->getName(), innerTabString, true, true);
+
+  return stepperCommandResult + "\n" + tabString + "}";
+}

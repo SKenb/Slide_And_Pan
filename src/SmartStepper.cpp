@@ -219,6 +219,29 @@ void SmartStepper::setResolution(MICROSTEPRESOLUTION setRes) {
     setSpeed(speed);
 }
 
+void SmartStepper::setResolutionFromInteger(int setRes) {
+    switch (setRes)
+    {
+        case 1:
+            setResolution(MICROSTEPRESOLUTION::FULL);
+            break;
+        case 2:
+            setResolution(MICROSTEPRESOLUTION::HALF);
+            break;
+        case 4:
+            setResolution(MICROSTEPRESOLUTION::QUARTER);
+            break;
+        case 8:
+            setResolution(MICROSTEPRESOLUTION::EIGHTH);
+            break;
+        case 16:
+            setResolution(MICROSTEPRESOLUTION::SIXTEENTH);
+            break;        
+        default:
+            break;
+    }
+}
+
 void SmartStepper::setStepsPerTurn(steps_t setSPT) {
     stepsPerTurn = setSPT;
     setSpeed(speed);

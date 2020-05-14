@@ -29,3 +29,24 @@ void tryStreamData(String data) {
         streamDataWarpperFunction(data);
     }
 }
+
+
+String getCommandHelp() {
+    String help = "All commands: \\n(use a command as parameter in the URL like: .../device/command/?help&...)\\n\\n";
+
+    for(String command : AVAILABLE_COMMANDS) {
+        help += "\t -> " + command + "\\n";
+    }
+
+    return help;
+}
+
+
+String getCommandList(String tabString) {
+    String listString = tabString + "[";
+    String innerTabString = tabString + "\t";
+
+    for(String command : AVAILABLE_COMMANDS) listString += innerTabString + command + ",\n";
+
+    return listString + tabString + " help]\n";
+}

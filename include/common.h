@@ -31,6 +31,38 @@
 #define SLIDEANDPAN_COPYRIGHT "Copyright (c) Sebastian Knoll 2020"
 #define SLIDEANDPAN_ID "S&P0001"
 
+#define SLIDEANDPAN_LINK_HANDBOOK "https://sebastianknoll.net/TODO"
+
+#define COMMAND_HELP "help"
+#define COMMAND_LIST_COMMANDS "commands"
+#define COMMAND_GET_DEVICE_NAME "device_name"
+#define COMMAND_GET_DEVICE_VERSION "device_version"
+#define COMMAND_GET_DEVICE_COPYRIGHT "device_copyright"
+#define COMMAND_GET_DEVICE_ID "device_id"
+#define COMMAND_GET_DEVICE_NAME "device_name"
+
+#define COMMAND_SLIDE_SLEEP "slide_sleep"
+#define COMMAND_SLIDE_SET_RESOLUTION "slide_res"
+#define COMMAND_SLIDE_TO "slide_to"
+#define COMMAND_SLIDE_SET_SPEED "slide_speed"
+#define COMMAND_SLIDE_SET_ACC "slide_acc"
+
+const String AVAILABLE_COMMANDS[] = {
+        COMMAND_HELP,
+        COMMAND_LIST_COMMANDS,
+        COMMAND_GET_DEVICE_NAME, 
+        COMMAND_GET_DEVICE_VERSION,
+        COMMAND_GET_DEVICE_COPYRIGHT,
+        COMMAND_GET_DEVICE_ID,
+        COMMAND_GET_DEVICE_NAME,
+        COMMAND_SLIDE_SLEEP,
+        COMMAND_SLIDE_SET_RESOLUTION,
+        COMMAND_SLIDE_TO,
+        COMMAND_SLIDE_SET_SPEED,
+        COMMAND_SLIDE_SET_ACC
+    };
+
+
 typedef unsigned int pin_t;
 
 void jsonAddField(String& json, String field, String value, String tabString, boolean wrapValue = false, boolean lastElement = false);
@@ -40,4 +72,8 @@ String getBasicDataJson(String tabString);
 
 void setStreamDataFunction(std::function<void (String)> setFunction);
 void tryStreamData(String data);
+
+String getCommandHelp();
+String getCommandList(String tabString);
+
 #endif

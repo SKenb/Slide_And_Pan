@@ -19,5 +19,5 @@ void setup() {
 
 void loop() {
   serverRoutine();
-  getSlideStepper()->rotateToAbsoluteAngle((angle_t)getEncoderRotation()*45);
+  //getSlideStepper()->rotateToAbsoluteAngle((angle_t)getEncoderRotation()*45);
 }

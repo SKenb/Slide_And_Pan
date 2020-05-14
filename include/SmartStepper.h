@@ -53,16 +53,13 @@ class SmartStepper
         static const uint32_t TICK_INTERRUPT_FREQ = 10000;
         static time_count_t tickDeltaCount;
 
-        steps_t resolutionToSteps();
         time_count_t timerCount;
-
 
         void internTick();
         void setSpeedModulo();
         void doStep();
         void setAcceleration();
         void setTargetSteps(steps_t setTargetSteps);
-        void setSleepState(SLEEPSTATE setState);
         void setSpeed(speed_t setSpeed);
         void setIdealResolutionIfPossible();
         MICROSTEPRESOLUTION calculateIdealResolutionFromSpeed();
@@ -78,19 +75,28 @@ class SmartStepper
         ~SmartStepper();
 
         bool isSleeping() { return sleepState == SLEEPSTATE::SLEEP; }
+        void setSleepState(SLEEPSTATE setState);
 
+        DIRECTION getDirection() { return direction; }
         void setDirection(DIRECTION setDir);
         
+        MICROSTEPRESOLUTION getResolution() { return resolution; }
+        steps_t resolutionToSteps();
         void setResolution(MICROSTEPRESOLUTION setRes);
+        void setResolutionFromInteger(int setRes);
 
+        bool hasChangeResolutionMethod() { return changeResolutionMethod != nullptr; }
         void setChangeResolutionMethod(std::function<void (MICROSTEPRESOLUTION)> setChangeResolutionMethod);
 
+        steps_t getStepsPerTurn() { return stepsPerTurn; }
         void setStepsPerTurn(steps_t setSPT);
 
+        speed_t getTargetSpeed() { return targetSpeed; }
         void setTargetSpeed(speed_t setTargetSpeed);
         speed_t getSpeed() { return speed; }
         speed_t getMaxSpeed();
 
+        acceleration_t getTargetAcceleration() { return targetAcceleration; }
         void setTargetAcceleration(acceleration_t setAcc);
 
         turns_t getTurns() { return steps / stepsPerTurn; }

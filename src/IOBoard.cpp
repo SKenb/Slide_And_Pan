@@ -28,9 +28,87 @@ IOBoard::IOBoard(   pin_t setLatchPin,
     numberOutputPorts = numOutputs;
     numberInputPorts = numInputs;
 
+    cameraExposureTime = CAM_TIME_EXPOSURE_DEFAULT;
+    cameraStatus = CAM_STATE_IDLE;
+
     setup();
 
     applyOutputState();
+
+    commonTicker.attach_ms(100, [this](){ this->commonTick(); } );
+
+    updateBatteryLevel();
+}
+
+void IOBoard::blinkTick() {
+    blinkHalfSecond = (blinkHalfSecond == HIGH) ? LOW : HIGH;
+    
+    if(blinkHalfSecond == HIGH) {
+        blinkSecond = (blinkSecond == HIGH) ? LOW : HIGH;
+    }
+}
+
+void IOBoard::commonTick() {
+    commonTickerCounter++;
+
+    if(commonTickerCounter % 5 == 0) {
+        blinkTick();
+    }
+
+    if(commonTickerCounter >= 20) {
+        commonTickerCounter = 0;
+        batteryTick();
+    }
+    
+    cameraTick();
+
+    incTimeByMinimumStep();
+
+    timeCounter++;
+    if(timeCounter >= ((clock_t)-1)) timeCounter = 0;
+}
+
+void IOBoard::cameraTick() {
+    cameraIntervalCounter+=TIME_RESOLUTION;
+
+    switch (cameraGetStatus())
+    {
+        case CAM_STATE_IDLE:
+            cameraIntervalCounter = 0;
+        break;
+
+        case CAM_STATE_PREPARE:
+            if(cameraIntervalCounter >= CAM_TIME_PREPARE) {
+                cameraStatus = CAM_STATE_PHOTO;
+                debugMessage("CamStatus: Photo (" + secondsToTimeString(getTime()) + ")");
+                cameraIntervalCounter = 0;
+            }
+        break;
+
+        case CAM_STATE_PHOTO:
+            if(cameraIntervalCounter >= cameraExposureTime) {
+                cameraStatus = CAM_STATE_REST;
+                debugMessage("CamStatus: Rest (" + secondsToTimeString(getTime()) + ")");
+                cameraIntervalCounter = 0;
+            }
+        break;
+
+        case CAM_STATE_REST:
+            if(cameraIntervalCounter >= CAM_TIME_REST) {
+                cameraStatus = CAM_STATE_IDLE;
+                debugMessage("CamStatus: Idle (" + secondsToTimeString(getTime()) + ")");
+                cameraIntervalCounter = 0;
+            }
+        break;
+
+        default:
+            debugMessage("CamStatus: Default (" + secondsToTimeString(getTime()) + ")");
+        break;
+    }
+}
+
+void IOBoard::batteryTick() {
+    updateBatteryLevel();
 }
 
 void IOBoard::setup() {
@@ -57,9 +135,10 @@ void IOBoard::applyOutputState() {
     digitalWrite(latchPin, HIGH);
 }
 
+ioport_t oldLevel = HIGH;
 void IOBoard::setOutput(ioport_t port, ioport_level_t level) {
     if(port >= numberOutputPorts) return;
-    
+
     unsigned int mask = (1 << port);
     if(level == HIGH) outputState |= mask;
     else  outputState &= (~mask);
@@ -113,4 +192,33 @@ void IOBoard::addOnPortChangeHandler(ioport_t port, std::function<void (ioport_l
     addOnChangeHandler([this, port, handler](unsigned int changedValues){ 
         if(changedValues & (1 << port)) handler((this->getInputState(port))); 
     });
+}
+
+void IOBoard::updateBatteryLevel() {
+  batteryLevel = analogRead(A0);  
+}
+
+String IOBoard::cameraStateToString() {
+    switch (cameraGetStatus())
+    {
+        case CAM_STATE_IDLE:
+            return "Idle";
+            break;
+
+        case CAM_STATE_PREPARE:
+            return "Prepare";
+            break;
+
+        case CAM_STATE_PHOTO:
+            return "Photo";
+            break;
+
+        case CAM_STATE_REST:
+            return "Rest";
+            break;
+
+        default:
+            return "Unknwon";
+            break;
+    }
 }

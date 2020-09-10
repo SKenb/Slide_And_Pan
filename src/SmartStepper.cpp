@@ -1,10 +1,12 @@
 #include "SmartStepper.h"
+#include "io.h"
 
 SmartStepper::SmartStepper(pin_t setDirectionPin, pin_t setStepPin, pin_t setSleepPin)
 {
     debugMessage("SmartStepper: new Stepper (current #" + String(SmartStepper::steppers.size()) + ")");
 
     name = "<NOT SPECIFIED>";
+    lazyMode = false;
 
     pinDirection = setDirectionPin;
     pinSleep = setSleepPin;
@@ -12,7 +14,7 @@ SmartStepper::SmartStepper(pin_t setDirectionPin, pin_t setStepPin, pin_t setSle
 
     pinMode(pinDirection, OUTPUT);
     pinMode(pinStep, OUTPUT);
-    pinMode(pinSleep, OUTPUT);
+    //pinMode(pinSleep, OUTPUT);
 
     setResolution(MICROSTEPRESOLUTION::SIXTEENTH);
     setChangeResolutionMethod(nullptr);
@@ -20,7 +22,7 @@ SmartStepper::SmartStepper(pin_t setDirectionPin, pin_t setStepPin, pin_t setSle
     steps = 0;
     targetSteps = 0;
 
-    speedMin = .01;
+    speedMin = .05;
     setTargetSpeed(1);
     setSpeed(0);
 
@@ -92,11 +94,6 @@ void SmartStepper::internTick() {
     }
 
     if((timerCount) % speedModulo == 0) doStep();
-    
-    if(timerCount % (SmartStepper::TICK_INTERRUPT_FREQ) == 0) {
-
-    }
-
     if(timerCount >= SmartStepper::TICK_INTERRUPT_FREQ) timerCount = 0;
 }
 
@@ -167,7 +164,11 @@ void SmartStepper::setAcceleration() {
 
 void SmartStepper::doStep() {
 
-    if(targetSteps == steps) return;
+    if(targetSteps == steps) {
+        //if(isInLazyMode() && !isSleeping()) setSleepState(SLEEP);
+        if(isInLazyMode()) setSleepState(SLEEP);
+        return;
+    }
     
     setDirection((targetSteps > steps) ? DIRECTION::FORWARD : DIRECTION::BACKWARD);
 
@@ -188,7 +189,8 @@ void SmartStepper::setTargetSteps(steps_t setTargetSteps) {
 }
 
 void SmartStepper::setSleepState(SLEEPSTATE setState) {
-    digitalWrite(pinSleep, ((setState == SLEEPSTATE::SLEEP) ? LOW : HIGH));
+    //digitalWrite(pinSleep, ((setState == SLEEPSTATE::SLEEP) ? LOW : HIGH));
+    getIOBoard()->setAndApplyOutput(pinSleep, ((setState == SLEEPSTATE::SLEEP) ? LOW : HIGH));
     sleepState = setState;
 }
 
@@ -202,8 +204,8 @@ void SmartStepper::setTargetSpeed(speed_t setTargetSpeed) {
 }
 
 void SmartStepper::setTargetAcceleration(acceleration_t setAcc) {
-    acceleration_t minAcc = 0.1;
-    acceleration_t maxAcc = 2;
+    acceleration_t minAcc = 0.01;
+    acceleration_t maxAcc = 20;
     targetAcceleration = min(max(setAcc, minAcc), maxAcc);
 }
 
@@ -254,7 +256,7 @@ void SmartStepper::setDirection(DIRECTION setDir) {
 
 void SmartStepper::rotate(angle_t angle) {
     setTargetSteps(steps + angle / 360 * stepsPerTurn);
-    debugMessage("Rotate " + String(angle) + "°");
+    //debugMessage("Rotate " + String(angle) + "°");
 }
 
 void SmartStepper::rotateToAbsoluteAngle(angle_t angle) {
@@ -331,3 +333,24 @@ String SmartStepper:: accJson(String tabString) {
     jsonAddField(json, "TargetAcceleration", String(targetAcceleration), myTabString, false, true);
     return json + tabString + "}";
 }
+
+
+String SmartStepper::streamData(String myName) {
+    String stream = "\"" + myName + "\": {";
+
+    stream += "\"Steps\": " + String(steps);
+    stream += ", \"Direction\": " + String(direction == DIRECTION::BACKWARD ? "Backward" : "Forward");
+    stream += ", \"Speed\": " + String(speed);
+
+    return stream + "}";
+}
+
+void SmartStepper::setPhysicalValueInfos(String value, String unit) { 
+    physicalValue = value;
+    physicalValueUnit = unit;
+}
+String SmartStepper::getPhysicalValueInfo(bool withValuePraefix) {
+    String valueAndUnit = String(getPhysicalValue()) + " " + physicalValueUnit;
+    return withValuePraefix ? physicalValue + " " + valueAndUnit : valueAndUnit;
+}
+

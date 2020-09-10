@@ -1,6 +1,8 @@
 #include "common.h"
 
 std::function<void (String)> streamDataWarpperFunction = nullptr;
+gTime_t daySeconds = 0;
+bool sliderDarkMode = true;
 
 void jsonAddField(String& json, String field, String value, String tabString, boolean wrapValue, boolean lastElement) {
     if(wrapValue) value = "\"" + value + "\"";
@@ -50,3 +52,44 @@ String getCommandList(String tabString) {
 
     return listString + tabString + " help]\n";
 }
+
+String getTimeInfo(gTime_t* secondsPtr, unsigned int base, String unit, String forMore = "s", String unitSuffix = " ", String zeroTimeString = "", bool zeroLeading = false) {
+    unsigned int time = (unsigned int)((*secondsPtr) / base);
+    
+    unsigned int rest = (unsigned int)(*secondsPtr);
+    rest %= base;
+    *secondsPtr = (gTime_t)rest;
+
+    String zerosInFront = ((zeroLeading && time <= 9) ? "0" : ""); 
+    if(time > 1) unit += forMore;
+    return time > 0 ? zerosInFront + String(time) + unit + unitSuffix : zeroTimeString;
+}
+
+String secondsToString(gTime_t valueInSeconds) {
+    String days = getTimeInfo(&valueInSeconds, (24 * 60 * 60), " day");
+    String hours = getTimeInfo(&valueInSeconds, (60 * 60), " hour");
+    String minutes = getTimeInfo(&valueInSeconds, (60), " minute");
+    String seconds = getTimeInfo(&valueInSeconds, 1, " second", "s", "", "0 seconds");
+
+    return days + hours + minutes + seconds;
+}
+
+String secondsToTimeString(gTime_t valueInSeconds) {
+    String days = getTimeInfo(&valueInSeconds, (24 * 60 * 60), " day");
+    String hours = getTimeInfo(&valueInSeconds, (60 * 60), ":", "", "", "00:", true);
+    String minutes = getTimeInfo(&valueInSeconds, (60), ":", "", "", "00:", true);
+    String seconds = getTimeInfo(&valueInSeconds, 1, "", "", "", "00", true);
+
+    String dayOffset = ((days.length() > 0) ? " (+" + days + ")" : "");
+    return hours + minutes + seconds + dayOffset;
+}
+
+gTime_t getTime() { return daySeconds; }
+
+void incTimeByMinimumStep() { daySeconds+= TIME_RESOLUTION; }
+
+void setTime(gTime_t currentDaySeconds) { daySeconds = currentDaySeconds; }
+
+bool isSliderInDarkMode() { return sliderDarkMode; }
+
+void setSliderDarkMode(bool value) { sliderDarkMode = value; }

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "slider.h"
 #include "common.h"
 #include "debug.h"
 #include "wifi.h"
@@ -15,9 +16,16 @@ void setup() {
   setupIOBoard();
   setupSteppers();
 
+  playStartLEDRoutine();
+
+  initSlider();
 }
 
 void loop() {
   serverRoutine();
-  //getSlideStepper()->rotateToAbsoluteAngle((angle_t)getEncoderRotation()*45);
+
+  handleCameraState();
+  setLEDStatus(getSliderState(), getTimelapseState());
+
+  sliderLoop();
 }

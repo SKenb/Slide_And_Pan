@@ -6,23 +6,37 @@
 #include "common.h"
 #include "IOBoard.h"
 
-#define PIN_LATCH WD5
-#define PIN_CLOCK WD6
-#define PIN_DATAOUT WD0
-#define PIN_DATAIN WD7
-#define PIN_LATCHIN WD8
-
-#define ENCODER_PIN_CLK 2
-#define ENCODER_PIN_DIRECTION 3
-
 void setupIOBoard();
 
 IOBoard* getIOBoard();
 
 int32_t getEncoderRotation();
 
+int32_t getEncoderDeltaRotation();
+
 String getIOJsonData(String tabString);
 
 String getEncoderJsonData(String tabString);
+
+void takePhoto(unsigned int time);
+
+void playStartLEDRoutine();
+
+void allLEDOff();
+
+void setLEDStatus(int sliderState, int timelapseState);
+
+void setBatteryStatusLED();
+
+int getBatteryLevel();
+
+void setCAMStatusLED();
+
+void setStepperStatusLED(int sliderState, int timelapseState);
+
+void handleCameraState();
+
+bool timelapsePreviewIsInRealSpeed();
+void setTimelapsePreviewIsInRealSpeed(bool value);
 
 #endif

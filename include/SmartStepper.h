@@ -59,7 +59,6 @@ class SmartStepper
         void setSpeedModulo();
         void doStep();
         void setAcceleration();
-        void setTargetSteps(steps_t setTargetSteps);
         void setSpeed(speed_t setSpeed);
         void setIdealResolutionIfPossible();
         MICROSTEPRESOLUTION calculateIdealResolutionFromSpeed();
@@ -68,6 +67,12 @@ class SmartStepper
         String postionJson(String tabString);
         String speedJson(String tabString);
         String accJson(String tabString);
+
+        bool lazyMode;
+
+        float physicalValuePerStep;
+        String physicalValueUnit;
+        String physicalValue;
         
     public:
 
@@ -76,6 +81,8 @@ class SmartStepper
 
         bool isSleeping() { return sleepState == SLEEPSTATE::SLEEP; }
         void setSleepState(SLEEPSTATE setState);
+
+        void setTargetSteps(steps_t setTargetSteps);
 
         DIRECTION getDirection() { return direction; }
         void setDirection(DIRECTION setDir);
@@ -88,8 +95,16 @@ class SmartStepper
         bool hasChangeResolutionMethod() { return changeResolutionMethod != nullptr; }
         void setChangeResolutionMethod(std::function<void (MICROSTEPRESOLUTION)> setChangeResolutionMethod);
 
+        steps_t getSteps() { return steps; }
+        steps_t getTargetSteps() { return targetSteps; }
+        bool isGoalReached() { return steps == targetSteps; }
+
+        void incTargetSteps(steps_t deltaSteps) { setTargetSteps(steps + deltaSteps); }
+
         steps_t getStepsPerTurn() { return stepsPerTurn; }
         void setStepsPerTurn(steps_t setSPT);
+
+        void stop() { targetSteps = steps; }
 
         speed_t getTargetSpeed() { return targetSpeed; }
         void setTargetSpeed(speed_t setTargetSpeed);
@@ -111,9 +126,26 @@ class SmartStepper
         void waitUntilTargetReached();
 
         String toJson(String myName, String tabString);
+        String streamData(String myName);
 
         void setName(String setName) { name = setName; }
         String getName() { return name; }
+
+        bool isInLazyMode() { return lazyMode; }
+        void setLazyMode(bool setMode) { lazyMode = setMode; }
+
+        void setPhysicalValueInfos(String value, String unit);
+        String getPhysicalValueUnit() { return physicalValueUnit; }
+        String getPhysicalValueInfo(bool withValuePraefix = false);
+        void setPhysicalValueRatio(float ratioPhysicalValuePerStep) { physicalValuePerStep = ratioPhysicalValuePerStep; }
+        float getPhysicalValue() { return physicalValuePerStep * getSteps(); }
+        float physicalValueToSteps(float value) { return value / physicalValuePerStep; }
+        void setTargetPhysicalValue(float value) { setTargetSteps(physicalValueToSteps(value)); }
+        String getPhysicalValueDescription() { return physicalValue; }
+        void incPhysicalValue(steps_t deltaValue) { setTargetPhysicalValue(getPhysicalValue() + deltaValue); }
+
+
+        void resetStepsToZero() { targetSteps = 0; steps = 0;}
 };
 
 #endif

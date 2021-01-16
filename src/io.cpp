@@ -98,7 +98,7 @@ void allLEDOff() {
   getIOBoard()->setOutput(PIN_LED_1_GREEN, LOW);
   getIOBoard()->setOutput(PIN_LED_2_GREEN, LOW);
   getIOBoard()->setOutput(PIN_LED_3_GREEN, LOW);
-  getIOBoard()->applyOutputState();
+  //getIOBoard()->applyOutputState();
 }
 
 
@@ -142,7 +142,7 @@ void setLEDStatus(int sliderState, int timelapseState) {
     setCAMStatusLED();
   }
 
-  getIOBoard()->applyOutputState();
+  //getIOBoard()->applyOutputState();
 }
 
 void setBatteryStatusLED() {

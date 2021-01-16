@@ -190,7 +190,8 @@ void SmartStepper::setTargetSteps(steps_t setTargetSteps) {
 
 void SmartStepper::setSleepState(SLEEPSTATE setState) {
     //digitalWrite(pinSleep, ((setState == SLEEPSTATE::SLEEP) ? LOW : HIGH));
-    getIOBoard()->setAndApplyOutput(pinSleep, ((setState == SLEEPSTATE::SLEEP) ? LOW : HIGH));
+    //IMP getIOBoard()->setAndApplyOutput(pinSleep, ((setState == SLEEPSTATE::SLEEP) ? LOW : HIGH));
+    getIOBoard()->setOutput(pinSleep, ((setState == SLEEPSTATE::SLEEP) ? LOW : HIGH));
     sleepState = setState;
 }
 

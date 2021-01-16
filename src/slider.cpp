@@ -36,6 +36,10 @@ void sliderLoop() {
 
     if(getIOBoard()->getBatteryLevel() < BATTERY_MIN && sliderState != STATE_BETTERY_EMPTY) {
         sliderState = STATE_BETTERY_EMPTY;
+        getPanStepper()->stop();
+        getPanStepper()->setSleepState(SLEEP);
+        getSlideStepper()->stop();
+        getSlideStepper()->setSleepState(SLEEP);
         debugMessage(">> State: Battery Empty (" + secondsToTimeString(getTime()) + ")");
     }
 
@@ -77,7 +81,6 @@ void timelapseRoutine()
     float slideSpeed = 0;
     float panSpeed = 0;
 
-
     switch (timelapseState)
     {
         case TIMELAPSE_STATE_INIT:
@@ -117,7 +120,7 @@ void timelapseRoutine()
             break;
        
         case TIMELAPSE_STATE_TRIGGER_SHOOT:
-            getIOBoard()->cameraTakePhoto();
+            //getIOBoard()->cameraTakePhoto();
             timelapsePhotoCount--;
             
             waitUntil = getTime() + timelapseIntervalTime;

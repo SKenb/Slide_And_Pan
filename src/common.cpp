@@ -66,6 +66,7 @@ String getTimeInfo(gTime_t* secondsPtr, unsigned int base, String unit, String f
 }
 
 String secondsToString(gTime_t valueInSeconds) {
+    //return "off";
     String days = getTimeInfo(&valueInSeconds, (24 * 60 * 60), " day");
     String hours = getTimeInfo(&valueInSeconds, (60 * 60), " hour");
     String minutes = getTimeInfo(&valueInSeconds, (60), " minute");
@@ -75,6 +76,7 @@ String secondsToString(gTime_t valueInSeconds) {
 }
 
 String secondsToTimeString(gTime_t valueInSeconds) {
+    //return "off";
     String days = getTimeInfo(&valueInSeconds, (24 * 60 * 60), " day");
     String hours = getTimeInfo(&valueInSeconds, (60 * 60), ":", "", "", "00:", true);
     String minutes = getTimeInfo(&valueInSeconds, (60), ":", "", "", "00:", true);

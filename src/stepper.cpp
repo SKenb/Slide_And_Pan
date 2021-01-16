@@ -118,7 +118,7 @@ void genericChangeResolutionMethod(pin_t M1, pin_t M2, pin_t M3, MICROSTEPRESOLU
       getIOBoard()->setOutput(M3, LOW);
       break;
 
-    getIOBoard()->applyOutputState();
+    //getIOBoard()->applyOutputState();
   }
 }
 

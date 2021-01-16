@@ -34,13 +34,13 @@
 #define TIME_RESOLUTION 0.1
 
 #define SLIDEANDPAN_NAME "Slide & Pan"
-#define SLIDEANDPAN_VERSION "1.0.0.7"
-#define SLIDEANDPAN_VERSION_INFO "Beta - Intr. Dark Mode"
+#define SLIDEANDPAN_VERSION "1.1.0.0"
+#define SLIDEANDPAN_VERSION_INFO "Open alpha - Bug fix"
 #define SLIDEANDPAN_COPYRIGHT "Copyright (c) Sebastian Knoll 2020"
 #define SLIDEANDPAN_ID "S&P0001"
 #define SLIDEANDPAN_ID_INFO "Special ID Info - First Slide & Pan device :)"
 
-#define SLIDEANDPAN_LINK_HANDBOOK "https://sebastianknoll.net/TODO"
+#define SLIDEANDPAN_LINK_HANDBOOK "https://sebastianknoll.net/slide"
 
 #define COMMAND_HELP "help"
 #define COMMAND_LIST_COMMANDS "commands"

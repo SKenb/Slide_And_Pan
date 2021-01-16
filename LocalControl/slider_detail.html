@@ -1,0 +1,120 @@
+<!doctype html>
+
+<html lang="en">
+
+%HEAD%
+
+<body>
+    %STYLE%
+
+    %SCRIPT%
+
+    <div id="container">
+        <h1>Slider in detail</h1>
+
+        <ul>
+            <li><a href="index">Control</a></li>
+            <li><a href="timelapse">Timelapse</a></li>
+            <li><a href="settings">Settings</a></li>
+        </ul>
+
+        <br>
+
+        <div class="section">
+            <h2>Slider Inforamtion</h2>
+            <br>
+            <p>Name: <i>%SAP_NAME%</i></p>
+            <p>Version: <i>%SAP_VERSION%</i></p>
+            <p>Copyright: <i>%SAP_CR%</i></p>
+            <p>ID: <i>%SAP_ID%</i></p>
+            <br>
+            <p>Note: <i>%SLIDEANDPAN_ID_INFO%</i></p>
+            <p>Ver.-Info: <i>%SAP_VERSION_INFO%</i></p>
+            <br>
+        </div>
+
+        <br><br>
+
+        <div class="section">
+            <h2>Hardware - Slide</h2>
+            <br>
+            <p>Direction Pin: <i>%S_DIR_PIN%</i></p>
+            <p>Step Pin <i>%S_STEP_PIN%</i></p>
+            <p>Sleep Pin <i>%S_SLEEP_PIN%</i></p>
+            <p>Steps / Turn: <i>%S_STEPS_PER_TURN%</i></p>
+            <p>Can change res.: <i>%S_CAN_CHANGE_RES%</i></p>
+            <br>
+            <p>Driver M1 Pin <i>%S_DRIVER_M1%</i></p>
+            <p>Driver M2 Pin <i>%S_DRIVER_M2%</i></p>
+            <p>Driver M3 Pin <i>%S_DRIVER_M3%</i></p>
+            <br>
+        </div>
+
+        <br><br>
+
+        <div class="section">
+            <h2>Hardware - Pan</h2>
+            <br>
+            <p>Direction Pin: <i>%P_DIR_PIN%</i></p>
+            <p>Step Pin <i>%P_STEP_PIN%</i></p>
+            <p>Sleep Pin <i>%P_SLEEP_PIN%</i></p>
+            <p>Steps / Turn: <i>%P_STEPS_PER_TURN%</i></p>
+            <p>Can change res.: <i>%P_CAN_CHANGE_RES%</i></p>
+            <br>
+            <p>Driver M1 Pin <i>%P_DRIVER_M1%</i></p>
+            <p>Driver M2 Pin <i>%P_DRIVER_M2%</i></p>
+            <p>Driver M3 Pin <i>%P_DRIVER_M3%</i></p>
+            <br>
+        </div>
+
+        <br><br>
+
+        <div class="section">
+            <h2>IO Board</h2>
+            <br>
+            <p>Latch Pin: <i>%PIN_LATCH%</i></p>
+            <p>Clock Pin: <i>%PIN_CLOCK%</i></p>
+            <p>DataOut Pin: <i>%PIN_DATAOUT%</i></p>
+            <p>DataIn Pin: <i>%PIN_DATAIN%</i></p>
+            <p>LatchIn Pin: <i>%PIN_LATCHIN%</i></p>
+            <br>
+            <p>Enc. CLK Pin: <i>%ENCODER_PIN_CLK%</i></p>
+            <p>Enc. DIR Pin: <i>%ENCODER_PIN_DIRECTION%</i></p>
+            <p>Enc. Switch Pin: <i>%ENCODER_PIN_SWITCH%</i></p>
+            <br>
+            <p>Battery AI Pin: <i>%PIN_BATTERY%</i></p>
+            <br>
+        </div>
+
+        <br><br>
+
+        <div class="section">
+            <h2>Constants</h2>
+            <br>
+            <p>Gear diameter: <i>%SLIDE_GEAR_DIAMETER%</i></p>
+            <p>Gear cog number: <i>%PAN_GEAR_SMALL_COG_NUMBER%</i></p>
+            <p>Big gear cog number: <i>%PAN_GEAR_LARGE_COG_NUMBER%</i></p>
+            <p>Earth rotation: <i>%EARTH_TIME_PER_DAY%</i></p>
+            <p>Moon rotation: <i>%MOON_TIME_PER_TURN%</i></p>
+            
+            <br>
+        </div>
+
+        <br><br>
+
+        <div class="section">
+            <h2>Time</h2>
+            <br>
+            <p>Slider Time: <i>%TIME%</i></p>
+            <br>
+            <button class="block" onclick="makeRequest('');">Set time</button>
+            <br>
+        </div>
+    </div>
+
+    <br>
+    <br>
+
+   
+</body>
+</html>

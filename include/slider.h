@@ -7,7 +7,15 @@
 
 int getSliderState();
 
+String getSliderStateString();
+
+String getSliderSubStateString();
+
+String getStatusStreamData();
+
 int getTimelapseState();
+
+String getTimelapseStateString();
 
 void initSlider();
 

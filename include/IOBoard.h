@@ -91,6 +91,7 @@ class IOBoard {
     ioport_level_t getBlinkHalfSecond() { return blinkHalfSecond; }
 
     int getBatteryLevel() { return batteryLevel; }
+    String getBatteryStream();
 
     gTime_t getTimeCounter() { return timeCounter; }
 

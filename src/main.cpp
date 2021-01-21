@@ -28,5 +28,7 @@ void loop() {
   setLEDStatus(getSliderState(), getTimelapseState());
   getIOBoard()->applyOutputState();
 
+  
+
   sliderLoop();
 }

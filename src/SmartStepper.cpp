@@ -339,9 +339,10 @@ String SmartStepper:: accJson(String tabString) {
 String SmartStepper::streamData(String myName) {
     String stream = "\"" + myName + "\": {";
 
-    stream += "\"Steps\": " + String(steps);
-    stream += ", \"Direction\": " + String(direction == DIRECTION::BACKWARD ? "Backward" : "Forward");
+    stream += "\"Position\": " + String(getPhysicalValue());
+    stream += ", \"Direction\": \"" + String(direction == DIRECTION::BACKWARD ? "Backward" : "Forward") + "\"";
     stream += ", \"Speed\": " + String(speed);
+    stream += ", \"Sleeping\": \"" + String(sleepState == SLEEPSTATE::AWAKE ? "No" : "Yes") + "\"";
 
     return stream + "}";
 }

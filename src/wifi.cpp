@@ -1,8 +1,10 @@
 #include "wifi.h"
 #include "slider.h"
 #include "htmlFiles.h"
+#include "htmlAppFiles.h"
 
 #define MAX_STREAM_CLIENTS 2
+#define KEEP_ALIVE_STREAM_COUNTER 5000
 
 IPAddress local_ip(192,168,1,1);
 IPAddress gateway(192,168,1,1);
@@ -12,6 +14,8 @@ ESP8266WebServer server(80);
 
 const char *ssid = APSSID;
 const char *password = APPPSW;
+
+unsigned int keepAliveStreamCounter = 0;
 
 std::vector<WiFiClient> streamClients;
 Ticker streamTimer;
@@ -34,17 +38,21 @@ String jsonDeviceStatus() {
 }
 
 String getStreamData() {
-    String stream = "{ ";
+    String stream = " { ";
 
-    stream += getSlideStepper()->streamData("Slide");
-    stream += ", " + getPanStepper()->streamData("Pan");
+    stream += getSlideStepper()->streamData("slide");
+    stream += ", " + getPanStepper()->streamData("pan");
+
+    stream += ", " + getStatusStreamData();
+
+    stream += ", " + getIOBoard()->getBatteryStream();
 
     return stream + "}";
 }
 
 void handleRoot() {
     //server.sendHeader("Location", "",true);   //Redirect to our html web page  
-    server.send(200, "text/html","<!doctype html><html lang='en'>            <head>            <meta charset='utf-8'>            <meta charset='utf-8'>            <meta name='viewport' content='width=device-width, initial-scale=1.0'>            <title>Slide and Pan</title>            <meta name='description' content='Slide and Pan'>            <meta name='author' content='Sebastian Knoll'>            </head>          <body>              <style>            * {              font-family:courier,arial,helvetica;            }            body {              background-color: rgb(180, 180, 180);            }            li {              display:inline-block;              margin: 5px;            }            ul {              margin: 0 auto;              display: inherit;            }            h1, h2, h3 {              text-align: center;            }            #container {              width: 100%;              max-width: 960px;              margin: 0 auto;            }            .section {              background: whitesmoke;              border-radius: 20px;              padding: 20px;            }            input {              width: 50px;            }            .set_button {              width: 200px;            }            .block {              display: block;              width: 100%;              height: 50px;;            }          </style>                      <script>            function makeRequest(command) {              var url = '/device/command/?' + command;                            var request = new XMLHttpRequest();              request.onreadystatechange = function() {                if (this.readyState == 4 && this.status == 200) {                  location.reload();                }              };              request.open('GET',url);              request.send();            }            function getDaytimeInSeconds() {              let now = new Date();              return now.getSeconds() + 60 * now.getMinutes() + 60*60* now.getHours();             }            var updateTimeRequest = new XMLHttpRequest();            updateTimeRequest.open('GET', '/device/command/?set_time=' + getDaytimeInSeconds());            updateTimeRequest.send();          </script>            <div id='container'>    <h1>Manual control</h1>    <ul>      <li><a href='index'>Control</a></li>      <li><a href='timelapse'>Timelapse</a></li>      <li><a href='settings'>Settings</a></li>    </ul>    <br>    <div class='section'>      <h2>Control</h2>      <br>      <button class='block' onclick='makeRequest(\"slide_to=1000000\");'>Slide Left</button>      <br>      <button class='block' onclick='makeRequest(\"slide_to=-1000000\");'>Slide Right</button>      <br>      <button class='block' onclick='makeRequest(\"pan_to=1000000\");'>Pan Left</button>      <br>      <button class='block' onclick='makeRequest(\"pan_to=-1000000\");'>Pan Right</button>      <br><br>      <button class='block' onclick='makeRequest(\"slide_stop&pan_stop\");'>Stop</button>      <br>    </div>    <br><br>    <div class='section'>      <h2>Speed</h2>      <br>      <button class='block' onclick='makeRequest(\"slide_speed=1&pan_speed=2\");'>Fast</button>      <br>      <button class='block' onclick='makeRequest(\"slide_speed=0.5&pan_speed=1\");'>Middle</button>      <br>      <button class='block' onclick='makeRequest(\"slide_speed=0.25&pan_speed=0.5\");'>Slow</button>      <br>      <button class='block' onclick='makeRequest(\"slide_speed=0.05&pan_speed=0.05\");'>Extrem slow</button>      <br>    </div>    <br><br>    <div class='section'>      <h2>Power</h2>      <br>      <button class='block' onclick='makeRequest(\"slide_sleep=0&pan_sleep=0\");'>Sleep</button>      <br>      <button class='block' onclick='makeRequest(\"slide_sleep=1&pan_sleep=1\");'>Power ON</button>      <br>    </div>    <br>    <br>    <a style='text-align: center; display: block;' href='about'>About</a>    <br>    <br>  </div></body></html>");
+    server.send(200, "text/html", getIndexPage());
 }
 
 void handleTimelapse() {
@@ -53,15 +61,23 @@ void handleTimelapse() {
 }
 
 void handleAbout() {
-    server.send(200, "text/html", "<!doctype html><html lang='en'>            <head>            <meta charset='utf-8'>            <meta charset='utf-8'>            <meta name='viewport' content='width=device-width, initial-scale=1.0'>            <title>Slide and Pan</title>            <meta name='description' content='Slide and Pan'>            <meta name='author' content='Sebastian Knoll'>            </head>          <body>            <style>            * {              font-family:courier,arial,helvetica;            }            body {              background-color: rgb(180, 180, 180);            }            li {              display:inline-block;              margin: 5px;            }            ul {              margin: 0 auto;              display: inherit;            }            h1, h2, h3 {              text-align: center;            }            #container {              width: 100%;              max-width: 960px;              margin: 0 auto;            }            .section {              background: whitesmoke;              border-radius: 20px;              padding: 20px;            }            input {              width: 50px;            }            .set_button {              width: 200px;            }            .block {              display: block;              width: 100%;              height: 50px;;            }          </style>                      <script>            function makeRequest(command) {              var url = '/device/command/?' + command;                            var request = new XMLHttpRequest();              request.onreadystatechange = function() {                if (this.readyState == 4 && this.status == 200) {                  location.reload();                }              };              request.open('GET',url);              request.send();            }            function getDaytimeInSeconds() {              let now = new Date();              return now.getSeconds() + 60 * now.getMinutes() + 60*60* now.getHours();             }            var updateTimeRequest = new XMLHttpRequest();            updateTimeRequest.open('GET', '/device/command/?set_time=' + getDaytimeInSeconds());            updateTimeRequest.send();          </script>            <div id='container'>    <h1>About</h1>    <ul>      <li><a href='index'>Control</a></li>      <li><a href='timelapse'>Timelapse</a></li>      <li><a href='settings'>Settings</a></li>    </ul>    <br>    <div class='section'>      <h2>Slider Inforamtion</h2>      <br>      <p>Name: <i>" + String(SLIDEANDPAN_NAME) + "</i></p>      <p>Version: <i>" + String(SLIDEANDPAN_VERSION) + "</i></p>      <p>Copyright: <i>" + String(SLIDEANDPAN_COPYRIGHT) + "</i></p>      <p>ID: <i>" + String(SLIDEANDPAN_ID) + "</i></p>      <br>      <a style='text-align: center; display: block;' href='detail'>More details</a>      <br>    </div>    <br><br>    <div class='section'>      <h2>Author</h2>      <br>      <p>        My name is <i>Sebastian Knoll</i> and I am the inventor and author of this project.         If you have any question regarding me or the app do not hesitate to         <a href='https://sebastianknoll.net/me/contact.php'>contact me</a> or visit my         <a href='https://sebastianknoll.net/'>homepage</a>.         <br>        <br>        If you have any legal concerns, note that this is an private application         which you can use at your own risk. Furthermore you can checkout         <a href='https://sebastianknoll.net/gtc/'>legal stuff</a> and         <a href='https://sebastianknoll.net/gtc/TODO'>legal stuff for Slide and Pan</a>.      </p>      <br>    </div>    <br><br>    <div class='section'>      <h2>More</h2>      <br>      <p>      Use the Hashtag <a href='https://www.instagram.com/explore/tags/slideandpan/'>#slideandpan</a> so that we can see your amazing work.      </p>      <br>      <p>Use the <a href='" + String(SLIDEANDPAN_LINK_HANDBOOK) + "'>Handbook</a> for more information and tutorials.</p>      <br>    </div>  </div>  <br>  <br>  </body></html>");
+    server.send(200, "text/html", getAboutPage());
 }
 
 void handleSliderDetail() {
-    server.send(200, "text/html", "<!doctype html><html lang='en'>            <head>            <meta charset='utf-8'>            <meta charset='utf-8'>            <meta name='viewport' content='width=device-width, initial-scale=1.0'>            <title>Slide and Pan</title>            <meta name='description' content='Slide and Pan'>            <meta name='author' content='Sebastian Knoll'>            </head>          <body>            <style>            * {              font-family:courier,arial,helvetica;            }            body {              background-color: rgb(180, 180, 180);            }            li {              display:inline-block;              margin: 5px;            }            ul {              margin: 0 auto;              display: inherit;            }            h1, h2, h3 {              text-align: center;            }            #container {              width: 100%;              max-width: 960px;              margin: 0 auto;            }            .section {              background: whitesmoke;              border-radius: 20px;              padding: 20px;            }            input {              width: 50px;            }            .set_button {              width: 200px;            }            .block {              display: block;              width: 100%;              height: 50px;;            }          </style>                      <script>            function makeRequest(command) {              var url = '/device/command/?' + command;                            var request = new XMLHttpRequest();              request.onreadystatechange = function() {                if (this.readyState == 4 && this.status == 200) {                  location.reload();                }              };              request.open('GET',url);              request.send();            }            function getDaytimeInSeconds() {              let now = new Date();              return now.getSeconds() + 60 * now.getMinutes() + 60*60* now.getHours();             }            var updateTimeRequest = new XMLHttpRequest();            updateTimeRequest.open('GET', '/device/command/?set_time=' + getDaytimeInSeconds());            updateTimeRequest.send();          </script>            <div id='container'>    <h1>Slider in detail</h1>    <ul>      <li><a href='index'>Control</a></li>      <li><a href='timelapse'>Timelapse</a></li>      <li><a href='settings'>Settings</a></li>    </ul>    <br>    <div class='section'>      <h2>Slider Inforamtion</h2>      <br>      <p>Name: <i>" + String(SLIDEANDPAN_NAME) + "</i></p>      <p>Version: <i>" + String(SLIDEANDPAN_VERSION) + "</i></p>      <p>Copyright: <i>" + String(SLIDEANDPAN_COPYRIGHT) + "</i></p>      <p>ID: <i>" + String(SLIDEANDPAN_ID) + "</i></p>      <br>      <p>Note: <i>" + String(SLIDEANDPAN_ID_INFO) + "</i></p>      <p>Ver.-Info: <i>" + String(SLIDEANDPAN_VERSION_INFO) + "</i></p>      <br>    </div>    <br><br>    <div class='section'>      <h2>Hardware - Slide</h2>      <br>      <p>Direction Pin: <i>" + String(SLIDE_STEPPER_PIN_DIRECTION) + "</i></p>      <p>Step Pin <i>" + String(SLIDE_STEPPER_PIN_STEP) + "</i></p>      <p>Sleep Pin <i>" + String(SLIDE_STEPPER_PIN_SLEEP) + "</i></p>      <p>Steps / Turn: <i>" + String(STEPPER_STEPS_PER_TURN) + "</i></p>      <p>Can change res.: <i>" + (getSlideStepper()->hasChangeResolutionMethod() ? "Yes" : "No") + "</i></p>      <br>      <p>Driver M1 Pin <i>" + String(SLIDE_STEPPER_DRIVER_M1) + "</i></p>      <p>Driver M2 Pin <i>" + String(SLIDE_STEPPER_DRIVER_M2) + "</i></p>      <p>Driver M3 Pin <i>" + String(SLIDE_STEPPER_DRIVER_M3) + "</i></p>      <br>    </div>    <br><br>    <div class='section'>      <h2>Hardware - Pan</h2>      <br>      <p>Direction Pin: <i>" + String(PAN_STEPPER_PIN_DIRECTION) + "</i></p>      <p>Step Pin <i>" + String(PAN_STEPPER_PIN_STEP) + "</i></p>      <p>Sleep Pin <i>" + String(PAN_STEPPER_PIN_SLEEP) + "</i></p>      <p>Steps / Turn: <i>" + String(STEPPER_STEPS_PER_TURN) + "</i></p>      <p>Can change res.: <i>" + (getPanStepper()->hasChangeResolutionMethod() ? "Yes" : "No") + "</i></p>      <br>      <p>Driver M1 Pin <i>" + String(PAN_STEPPER_DRIVER_M1) + "</i></p>      <p>Driver M2 Pin <i>" + String(PAN_STEPPER_DRIVER_M2) + "</i></p>      <p>Driver M3 Pin <i>" + String(PAN_STEPPER_DRIVER_M3) + "</i></p>      <br>    </div>    <br><br>    <div class='section'>      <h2>IO Board</h2>      <br>      <p>Latch Pin: <i>" + String(PIN_LATCH) + "</i></p>      <p>Clock Pin: <i>" + String(PIN_CLOCK) + "</i></p>      <p>DataOut Pin: <i>" + String(PIN_DATAOUT) + "</i></p>      <p>DataIn Pin: <i>" + String(PIN_DATAIN) + "</i></p>      <p>LatchIn Pin: <i>" + String(PIN_LATCHIN) + "</i></p>      <br>      <p>Enc. CLK Pin: <i>" + String(ENCODER_PIN_CLK) + "</i></p>      <p>Enc. DIR Pin: <i>" + String(ENCODER_PIN_DIRECTION) + "</i></p>      <p>Enc. Switch Pin: <i>" + String(ENCODER_PIN_SWITCH) + "</i></p>      <br>      <p>Battery AI Pin: <i>" + String(PIN_BATTERY) + "</i></p>      <br>    </div>    <br><br>    <div class='section'>      <h2>Constants</h2>      <br>      <p>Gear diameter: <i>" + String(SLIDE_GEAR_DIAMETER) + "</i></p>      <p>Gear cog number: <i>" + String(PAN_GEAR_SMALL_COG_NUMBER) + "</i></p>      <p>Big gear cog number: <i>" + String(PAN_GEAR_LARGE_COG_NUMBER) + "</i></p>      <p>Earth rotation: <i>" + secondsToString(EARTH_SECONDS_PER_DAY) + "</i></p>      <p>Moon rotation: <i>" + secondsToString(MOON_SECONDS_PER_TURN) + "</i></p>            <br>    </div>    <br><br>    <div class='section'>      <h2>Time</h2>      <br>      <p>Slider Time: <i>" + secondsToTimeString(getTime()) + "</i></p>      <br>      <button class='block' onclick='makeRequest(\"\");'>Set time</button>      <br>    </div>  </div>  <br>  <br>  </body></html>");
+    server.send(200, "text/html", getSliderdetailPage());
 }
 
 void handleSettings() {
-    server.send(200, "text/html", "<!doctype html><html lang='en'>            <head>            <meta charset='utf-8'>            <meta charset='utf-8'>            <meta name='viewport' content='width=device-width, initial-scale=1.0'>            <title>Slide and Pan</title>            <meta name='description' content='Slide and Pan'>            <meta name='author' content='Sebastian Knoll'>            </head>          <body>            <style>            * {              font-family:courier,arial,helvetica;            }            body {              background-color: rgb(180, 180, 180);            }            li {              display:inline-block;              margin: 5px;            }            ul {              margin: 0 auto;              display: inherit;            }            h1, h2, h3 {              text-align: center;            }            #container {              width: 100%;              max-width: 960px;              margin: 0 auto;            }            .section {              background: whitesmoke;              border-radius: 20px;              padding: 20px;            }            input {              width: 50px;            }            .set_button {              width: 200px;            }            .block {              display: block;              width: 100%;              height: 50px;;            }          </style>                      <script>            function makeRequest(command) {              var url = '/device/command/?' + command;                            var request = new XMLHttpRequest();              request.onreadystatechange = function() {                if (this.readyState == 4 && this.status == 200) {                  location.reload();                }              };              request.open('GET',url);              request.send();            }            function getDaytimeInSeconds() {              let now = new Date();              return now.getSeconds() + 60 * now.getMinutes() + 60*60* now.getHours();             }            var updateTimeRequest = new XMLHttpRequest();            updateTimeRequest.open('GET', '/device/command/?set_time=' + getDaytimeInSeconds());            updateTimeRequest.send();          </script>            <div id='container'>    <h1>Settings</h1>    <ul>      <li><a href='index'>Control</a></li>      <li><a href='timelapse'>Timelapse</a></li>      <li><a href='settings'>Settings</a></li>    </ul>    <br>    <div class='section'>      <h2>Slide</h2>      <br>      <p>" + (getSlideStepper()->getPhysicalValueDescription()) + ": <i>" + (getSlideStepper()->getPhysicalValueInfo()) + "</i> <button onclick='makeRequest(\"slide_reset\");'>Center</button></p>      <input type='number' value='" + (getSlideStepper()->getPhysicalValueInfo()) + "' step='0.001' min='-50000' max='50000' id='slide_pv'>      <button class='set_button' onclick='makeRequest(\"slide_physical_value=\" + document.getElementById(\"slide_pv\").value);'>Go to " + (getSlideStepper()->getPhysicalValueDescription()) + "</button>      <br>      <br>      <p>Sleep: <i>" + String(getSlideStepper()->isSleeping() ? "Sleeping" : "Awake") + "</i> <button onclick='makeRequest(\"slide_sleep=" + String(getSlideStepper()->isSleeping() ? 1 : 0) + "\");'>" + String(getSlideStepper()->isSleeping() ? "Awake" : "Sleep") + "</button></p>      <p>Steps: <i>" + String(getSlideStepper()->getSteps()) + "</i>/<i>" + String(getSlideStepper()->getTargetSteps()) + "</i></p>      <p>Speed: <i>" + String(getSlideStepper()->getSpeed()) + "</i>/<i>" + String(getSlideStepper()->getTargetSpeed()) + "</i></p>      <p>LazyMode: <i>" + (getSlideStepper()->isInLazyMode() ? "Yes" : "No") + "</i> <button onclick='makeRequest(\"slide_lazy=" + (getSlideStepper()->isInLazyMode() ? 0 : 1) + "\");'>" + (getSlideStepper()->isInLazyMode() ? "Go Strong" : "Go Lazy") + "</button></p>      <br>      <p>Resolution: <i>" + String(getSlideStepper()->getResolution()) + "</i></p>            <div>        <button onclick='makeRequest(\"slide_res=1\");'>1</button>        <button onclick='makeRequest(\"slide_res=2\");'>2</button>        <button onclick='makeRequest(\"slide_res=4\");'>4</button>        <button onclick='makeRequest(\"slide_res=8\");'>8</button>        <button onclick='makeRequest(\"slide_res=16\");'>16</button>      </div>      <br>    </div>    <br><br>    <div class='section'>      <h2>Pan</h2>      <br>      <p>" + (getPanStepper()->getPhysicalValueDescription()) + ": <i>" + (getPanStepper()->getPhysicalValueInfo()) + "</i> <button onclick='makeRequest(\"pan_reset\");'>Center</button></p>      <input type='number' value='" + (getPanStepper()->getPhysicalValueInfo()) + "' step='0.001' min='-50000' max='50000' id='pan_pv'>      <button class='set_button' onclick='makeRequest(\"pan_physical_value=\" + document.getElementById(\"pan_pv\").value);'>Go to " + (getPanStepper()->getPhysicalValueDescription()) + "</button>      <br>      <br>      <p>Sleep: <i>" + String(getPanStepper()->isSleeping() ? "Sleeping" : "Awake") + "</i> <button onclick='makeRequest(\"pan_sleep=" + String(getPanStepper()->isSleeping() ? 1 : 0) + "\");'>" + String(getPanStepper()->isSleeping() ? "Awake" : "Sleep") + "</button></p>      <p>Steps: <i>" + String(getPanStepper()->getSteps()) + "</i>/<i>" + String(getPanStepper()->getTargetSteps()) + "</i></p>      <p>Speed: <i>" + String(getPanStepper()->getSpeed()) + "</i>/<i>" + String(getPanStepper()->getTargetSpeed()) + "</i></p>      <p>LazyMode: <i>" + (getPanStepper()->isInLazyMode() ? "Yes" : "No") + "</i> <button onclick='makeRequest(\"pan_lazy=" + String(getPanStepper()->isInLazyMode() ? 0 : 1) + "\");'>" + (getPanStepper()->isInLazyMode() ? "Go Strong" : "Go Lazy") + "</button></p>      <br>      <p>Resolution: <i>" + String(getPanStepper()->getResolution()) + "</i></p>            <div>        <button onclick='makeRequest(\"pan_res=1\");'>1</button>        <button onclick='makeRequest(\"pan_res=2\");'>2</button>        <button onclick='makeRequest(\"pan_res=4\");'>4</button>        <button onclick='makeRequest(\"pan_res=8\");'>8</button>        <button onclick='makeRequest(\"pan_res=16\");'>16</button>      </div>      <br>    </div>    <br><br>    <div class='section'>      <h2>Additional</h2>      <br>      <p>Battery-Level: <i>" + String(getIOBoard()->getBatteryLevel()) + "</i></p>      <br>      <p>S/P LazyMode: <i>" + (getPanStepper()->isInLazyMode() ? "Yes" : "No") + "</i>/<i>" + (getPanStepper()->isInLazyMode() ? "Yes" : "No") + "</i></p>      <button onclick='makeRequest(\"pan_lazy=1&slide_lazy=1\");'>Set both Lazy</button>      <button onclick='makeRequest(\"pan_lazy=0&slide_lazy=0\");'>Set both Strong</button>      <br>      <br>      <br>      <p id='darkMode' name='darkMode'>DarkMode: <a href='#darkMode' onclick='makeRequest(\"set_darkmode=" + String(isSliderInDarkMode() ? 0 : 1) + "\");'><i>" + (isSliderInDarkMode() ? "is On" : "is Off") + "</i></a></p>      <br>    </div>    <br>    <br>    <div class='section'>      <h2>Logs</h2>      <br>      <div style='overflow-x: scroll; padding-bottom: 10px;'>        <p style='display: inline; white-space: nowrap; overflow-x: scroll;'>" + getRingBufferForWeb() + "</p>      </div>      <br>    </div>  </div>  <br>  <br>  <a style='text-align: center; display: block;' href='about'>About</a>  <br>  <br></body></html>");
+    server.send(200, "text/html", getSettingsPage());
+}
+
+void handleMainCss() {
+    server.send(200, "text/css", getMaincssPage());
+}
+
+void handleMainJS() {
+    server.send(200, "application/javascript", getMainjsPage());
 }
 
 void sendCommonHeaders() {
@@ -236,12 +252,31 @@ void streamData(String data) {
 }
 
 void keepAliveStream() {
+    keepAliveStreamCounter++;
+
+    if(keepAliveStreamCounter < KEEP_ALIVE_STREAM_COUNTER) return;
+
+    keepAliveStreamCounter = 0;
     streamData(getStreamData());
 }
 
 void serverRoutine() {
     server.handleClient();
     keepAliveStream();
+}
+
+void handleGenericHTML(String page) {
+    server.send(200, "text/html", page);
+}
+
+void handleGenericCSS(String page) {
+    server.sendHeader("Cache-Control", "max-age=31536000");
+    server.send(200, "text/css", page);
+}
+
+void handleGenericJS(String page) {
+    server.sendHeader("Cache-Control", "max-age=31536000");
+    server.send(200, "application/json", page);
 }
 
 void serverSetup() {
@@ -259,9 +294,22 @@ void serverSetup() {
     server.on("/settings", handleSettings);
     server.on("/detail", handleSliderDetail);
     server.on("/about", handleAbout);
+    server.on("/main.css", handleMainCss);
+    server.on("/main.js", handleMainJS);
     server.onNotFound(handleRoot);
 
-    
+    server.on("/app/", [](){ handleGenericHTML(getIndexAppPage()); });
+    server.on("/app/index.html", [](){ handleGenericHTML(getIndexAppPage()); });
+    server.on("/app/control.html", []() { handleGenericHTML(getControlAppPage()); });
+    server.on("/app/timelapse.html", []() { handleGenericHTML(getTimelapseAppPage()); });
+    server.on("/app/milkyway.html", []() { handleGenericHTML(getMilkywayAppPage()); });
+    server.on("/app/tracker.html", []() { handleGenericHTML(getTrackerAppPage()); });
+    server.on("/app/plan.html", []() { handleGenericHTML(getPlanAppPage()); });
+    server.on("/app/info.html", []() { handleGenericHTML(getInfoAppPage()); });
+    server.on("/app/mainCss.css", []() { handleGenericCSS(getMaincssAppPage()); });
+    server.on("/app/definesCss.css", []() { handleGenericCSS(getDefinescssAppPage()); });
+    server.on("/app/mainJs.js", []() { handleGenericJS(getMainjsAppPage()); });
+
     server.on("/device/all/", sliderRequestAll);
     server.on("/device/stream/", sliderRequestStream);
     server.on("/device/command/", sliderRequestCommand);

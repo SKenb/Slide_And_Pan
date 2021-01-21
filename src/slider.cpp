@@ -19,7 +19,75 @@ gTime_t waitUntil;
 
 int getSliderState() { return sliderState; }
 
+String getSliderStateString() {
+    switch (getSliderState())
+    {
+        case STATE_IDLE:
+            return "Idle";
+        case STATE_TIMELAPSE:
+            return "Timelapse";
+        case STATE_BETTERY_EMPTY:
+            return "Battery empty";
+        default:
+            return "0.o WoW - I don't know";
+    }
+}
+
+String getSliderSubStateString() {
+    switch (getSliderState())
+    {
+        case STATE_IDLE:
+            return "Waiting for taks :D";
+        case STATE_TIMELAPSE:
+            return getTimelapseStateString();
+        case STATE_BETTERY_EMPTY:
+            return "Plase charge :/";
+        default:
+            return "0.o WoW - I don't know";
+    }
+}
+
+String getStatusStreamData() {
+    String stream = "\"state\": { \"state\": \"" + getSliderStateString() + "\"";
+    stream += ", \"detail\": \"" + getSliderSubStateString() + "\"}";
+
+    return stream;
+}
+
 int getTimelapseState() { return timelapseState; }
+
+
+String getTimelapseStateString() {
+    switch (getTimelapseState())
+    {
+        case TIMELAPSE_STATE_INIT:
+            return "Initialitzing";
+        case TIMELAPSE_STATE_SET_MOVE_GOAL:
+            return "Set new move goal";
+        case TIMELAPSE_STATE_MOVE:
+            return "Move";
+        case TIMELAPSE_STATE_TRIGGER_SHOOT:
+            return "Trigger shoot";
+        case TIMELAPSE_STATE_SHOOT:
+            return "Shoot";
+        case TIMELAPSE_STATE_WAIT:
+            return "Wait";
+        case TIMELAPSE_STATE_FINISHED:
+            return "Finished";
+        case TIMELAPSE_STATE_PREVIEW_START:
+            return "Preview: Start";
+        case TIMELAPSE_STATE_PREVIEW_MOVE:
+            return "Preview: Move";
+        case TIMELAPSE_STATE_PREVIEW_SET_MOVE_GOAL:
+            return "Preview: set new move goal";
+        case TIMELAPSE_STATE_PREVIEW_WAIT_AT_END:
+            return "Preview: End";
+        case TIMELAPSE_STATE_PREVIEW_STOP:
+            return "Preview: Stop";
+        default:
+            return "0.o WoW - I don't know";
+    }
+}
 
 void initSlider() {
     sliderState = STATE_IDLE;

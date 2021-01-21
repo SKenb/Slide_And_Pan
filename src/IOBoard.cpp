@@ -121,6 +121,17 @@ void IOBoard::setup() {
     pinMode(latchInPin, OUTPUT);
 }
 
+String IOBoard::getBatteryStream() {
+    String stream = "\"battery\": {";
+    stream += " \"level\": " + String(batteryLevel);
+    stream += ", \"full\":" + String(BATTERY_GREEN_MIN);
+    stream += ", \"middle\":" + String(BATTERY_ORANGE_MIN);
+    stream += ", \"empty\":" + String(BATTERY_RED_MIN);
+    stream += ", \"critical\":" + String(BATTERY_RED_BLINK_MIN);
+
+    return stream + "}";
+}
+
 void IOBoard::applyOutputState() {
     
     digitalWrite(latchPin, LOW);

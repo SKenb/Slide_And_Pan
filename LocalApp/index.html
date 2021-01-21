@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide and Pan</title>
+
+    <link rel="stylesheet" href="definesCss.css">
+    <link rel="stylesheet" href="mainCss.css">
+
+    <script src="mainJs.js"></script>
+</head>
+<body>
+    <div id="status-bar">
+        <div id="battery">
+            <div id="battery-plus-pole"></div>
+            <div id="battery-fill"></div>
+            <div id="battery-glas"></div>
+        </div>
+
+        <div class="status left">
+            &#128678; <span class="insertSTATE" id="status" onclick="document.getElementById('status-bar-detail').classList.toggle('open');"></span>
+        </div>
+
+        <div id="e-stop" onclick="makeRequest('slide_stop&pan_stop');">
+            <p>E-STOP</p>
+        </div>
+
+        <div class="status right">
+            <p><span id="connection">&#128225;</span> &#128247; <span id="camera">READY</span></p>
+        </div>
+    </div>
+
+    <div id="status-bar-detail" onclick="document.getElementById('status-bar-detail').classList.remove('open');">
+        <h1 class="insertSTATE"></h1>
+        <p class="insertSTATEDETAIL">we don't know so far</p>
+    </div>
+
+    <div id="select" class="select wheel">
+        <div class="select option option1" onclick="select(1);"><p>&#127918;</p></div>
+        <div class="select option option2" onclick="select(2);"><p>&#9202;</p></div>
+        <div class="select option option3" onclick="select(3);"><p>&#127775;</p></div>
+        <div class="select option option4" onclick="select(4);"><p>&#128301;</p></div>
+        <div class="select option option5" onclick="select(5);"><p>&#128203;</p></div>
+        <div class="select option option6" onclick="select(6);"><p>&#128209;</p></div>
+    </div>
+
+
+    <iframe id="iframe" src="" frameBorder="0"></iframe>
+    <script>select(2); startStreamListener();</script>
+</body>
+</html>

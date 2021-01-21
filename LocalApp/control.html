@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control</title>
+
+    <link rel="stylesheet" href="definesCss.css">
+    <link rel="stylesheet" href="mainCss.css">
+
+    <script src="mainJs.js"></script>
+</head>
+<body style="overflow: hidden;">
+    <div class="content">
+        <div class="vspace"></div>
+        <h1>&#127918; Control</h1>
+        <p style="text-align: center; font-size: .7em;">
+            <span class="insertSLIDEPOS">?</span>cm / 
+            <span class="insertPANPOS">?</span>°</p>
+        <div class="control-container">
+            <div></div>
+            <div><div class="button" onclick="makeRequest('slide_to=1000000');">&#11014;</div></div>
+            <div></div>
+
+            <div><div class="button" onclick="makeRequest('pan_to=1000000');">&#8618;</div></div>
+            <div><div class="button stop" onclick="makeRequest('slide_stop&pan_stop');"><p>STOP</p></div></div>
+            <div><div class="button" onclick="makeRequest('pan_to=-1000000');">&#8617;</div></div>
+
+            <div></div>
+            <div><div class="button" onclick="makeRequest('slide_to=-1000000');">&#11015;</div></div>
+            <div></div>
+        </div>
+
+        <div class="main-container">
+            <h3>&#128640; Speed</h3>
+            <p style="text-align: center;" id="speed-selection">Fast</p>
+            <input type="range" min="1" max="4" value="2" class="slider" id="myRange" 
+                    onchange="changeSpeed(this);">
+        </div>
+    </div>
+</body>
+</html>

@@ -91,23 +91,30 @@ function updateGUIFromStramData() {
 
     for (var classOI in classPathMap) {
         if (classPathMap.hasOwnProperty(classOI)) {      
-
-            var elements = document.getElementsByClassName(classOI);
-            var iFrameElements = document.getElementById('iframe').contentWindow.document.getElementsByClassName(classOI);
-
-            [elements, iFrameElements].forEach(list => {
-
-                for (var index = 0; index < list.length; index++) {
-                    try {
-                        list[index].innerHTML = classPathMap[classOI](streamData);
-                    } catch (error) {
-                        
-                    }
-                }
-            });
-            
+            updateGUIValue(classOI, classPathMap[classOI](streamData));
         }
     }
+}
+
+function updateGUIValue(classOI, value) {
+
+    var elements = document.getElementsByClassName(classOI);
+
+    ifr = document.getElementById('iframe');
+    var iFrameElements = ifr 
+        ? document.getElementById('iframe').contentWindow.document.getElementsByClassName(classOI)
+        : [];
+
+    [elements, iFrameElements].forEach(list => {
+
+        for (var index = 0; index < list.length; index++) {
+            try {
+                list[index].innerHTML = value;
+            } catch (error) {
+                
+            }
+        }
+    });
 }
     
 function updateBattery(batteryData) {
@@ -155,12 +162,20 @@ function setInnerConnection(antenne) {
 setInterval(function() {
     heartBeatCount--;
     if(heartBeatCount<=0) {
+        streamData = null;
+
         if(heartBeatCount >= -10) {
             setConnection(heartBeatCount % 2);
+        
+            dotString = "...".substr(0, Math.abs(heartBeatCount % 4));
+            updateGUIValue("insertSTATE", "Wait for Slider" + dotString);
+            updateGUIValue("insertSTATEDETAIL", "Maybe we lost the connection :0");
         }
         else {
             setInnerConnection(false);
             setConnection(true);
+            updateGUIValue("insertSTATE", "No Connection!");
+            updateGUIValue("insertSTATEDETAIL", "Please try to reconnect.");
         }
     }
 }, 500);

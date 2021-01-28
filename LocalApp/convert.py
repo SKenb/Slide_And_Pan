@@ -9,15 +9,13 @@ def getFiles():
             "_min" not in f and
             f.split(".")[-1] in extensions]
 
-TO_REPLACE = {
-                "%STATE%": "\" + getSliderStateString() + \"",
+TO_REPLACE = {  "%STATE%": "\" + getSliderStateString() + \"",
                 "%STATE_DETAIL%": "\" + getSliderSubStateString() + \"",
                 "%PAN%": "\" + String(getTimelapsePanSteps()) + \"",
                 "%SLIDE%": "\" + String(getTimelapseSlideSteps()) + \"",
                 "%PC%": "\" + String(getTimelapsePictureCount()) + \"",
                 "%EXP%": "\" + String(getIOBoard()->getCameraExposureTime()) + \"",
                 "%INT%": "\" + String(getTimelapseInterval()) + \"",
-                "%SLIDE%": "\" + String(getTimelapseSlideSteps()) + \"",
                 "%SAP_NAME%": "\" + String(SLIDEANDPAN_NAME) + \"",
                 "%SAP_VERSION%": "\" + String(SLIDEANDPAN_VERSION) + \"",
                 "%SAP_VERSION_INFO%": "\" + String(SLIDEANDPAN_VERSION_INFO) + \"",
@@ -113,12 +111,14 @@ def convert(file):
 
     content = content.replace("'", "**R**").replace("\"", "'").replace("**R**", "\\\"")
     for tore in TO_REPLACE: content = content.replace(tore, TO_REPLACE[tore])
-    content = content.replace("\t", " ").replace("\n", "\";\n\tsite += \"").replace("  ", " ")
+    content = content.replace("\t", " ").replace("\n", "\");\n\tserver.sendContent(\"").replace("  ", " ")
+
 
     filename = file.split(".")[0:-1]
-    fileContent += "\n\nString get" + filename[0].capitalize() + "AppPage() {\n"
-    fileContent += "\tString site = \"" + content + "\";"
-    fileContent += "\n\n\treturn site;\n}"
+    fileContent += "\n\nvoid " + filename[0].capitalize() + "AppPageHandler(ESP8266WebServer& server) {\n"
+    fileContent += "\tserver.sendContent(\"" + content
+    fileContent = fileContent.replace("\"\"", "\"\\n\"")
+    fileContent += "\");\n}"
 
 def initFileContent():
     global fileContent

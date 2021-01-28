@@ -16,10 +16,9 @@
 #define APPPSW SLIDEANDPAN_NAME
 
 void serverSetup();
-void handleRoot();
-void handleTimelapse();
 void sliderRequest();
 void serverRoutine();
+void handlePage(std::function<void (ESP8266WebServer&)> handler, String type = "text/html", bool cache = false);
 String handleRequestParameter(String paramName, String paramValue);
 
 #endif

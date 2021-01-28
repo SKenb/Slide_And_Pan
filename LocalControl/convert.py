@@ -9,8 +9,7 @@ def getFiles():
             "_min" not in f and
             f.split(".")[-1] in extensions]
 
-TO_REPLACE = {
-                    "%HEAD%": """
+TO_REPLACE = {  "%HEAD%": """
                         <head>
                         <meta charset='utf-8'>
 
@@ -127,8 +126,8 @@ TO_REPLACE = {
                     "%S_SPEED%": "\" + String(getSlideStepper()->getSpeed()) + \"",
                     "%S_TSPEED%": "\" + String(getSlideStepper()->getTargetSpeed()) + \"",
                     "%S_RES%": "\" + String(getSlideStepper()->getResolution()) + \"",
-                    "%S_LAZY%": "\" + (getSlideStepper()->isInLazyMode() ? \"Yes\" : \"No\") + \"",
-                    "%S_NLAZY%": "\" + (getSlideStepper()->isInLazyMode() ? \"Go Strong\" : \"Go Lazy\") + \"",
+                    "%S_LAZY%": "\" + String(getSlideStepper()->isInLazyMode() ? \"Yes\" : \"No\") + \"",
+                    "%S_NLAZY%": "\" + String(getSlideStepper()->isInLazyMode() ? \"Go Strong\" : \"Go Lazy\") + \"",
                     "%S_INLAZY%": "\" + String(getSlideStepper()->isInLazyMode() ? 0 : 1) + \"",
                     "%S_PHY_VALUE_DES%": "\" + (getSlideStepper()->getPhysicalValueDescription()) + \"",
                     "%S_PHY_VALUE%": "\" + (getSlideStepper()->getPhysicalValueInfo()) + \"",
@@ -137,7 +136,7 @@ TO_REPLACE = {
                     "%S_STEP_PIN%": "\" + String(SLIDE_STEPPER_PIN_STEP) + \"",
                     "%S_SLEEP_PIN%": "\" + String(SLIDE_STEPPER_PIN_SLEEP) + \"",
                     "%S_STEPS_PER_TURN%": "\" + String(STEPPER_STEPS_PER_TURN) + \"",
-                    "%S_CAN_CHANGE_RES%": "\" + (getSlideStepper()->hasChangeResolutionMethod() ? \"Yes\" : \"No\") + \"",
+                    "%S_CAN_CHANGE_RES%": "\" + String(getSlideStepper()->hasChangeResolutionMethod() ? \"Yes\" : \"No\") + \"",
                     "%S_DRIVER_M1%": "\" + String(SLIDE_STEPPER_DRIVER_M1) + \"",
                     "%S_DRIVER_M2%": "\" + String(SLIDE_STEPPER_DRIVER_M2) + \"",
                     "%S_DRIVER_M3%": "\" + String(SLIDE_STEPPER_DRIVER_M3) + \"",
@@ -149,8 +148,8 @@ TO_REPLACE = {
                     "%P_SPEED%": "\" + String(getPanStepper()->getSpeed()) + \"",
                     "%P_TSPEED%": "\" + String(getPanStepper()->getTargetSpeed()) + \"",
                     "%P_RES%": "\" + String(getPanStepper()->getResolution()) + \"",
-                    "%P_LAZY%": "\" + (getPanStepper()->isInLazyMode() ? \"Yes\" : \"No\") + \"",
-                    "%P_NLAZY%": "\" + (getPanStepper()->isInLazyMode() ? \"Go Strong\" : \"Go Lazy\") + \"",
+                    "%P_LAZY%": "\" + String(getPanStepper()->isInLazyMode() ? \"Yes\" : \"No\") + \"",
+                    "%P_NLAZY%": "\" + String(getPanStepper()->isInLazyMode() ? \"Go Strong\" : \"Go Lazy\") + \"",
                     "%P_INLAZY%": "\" + String(getPanStepper()->isInLazyMode() ? 0 : 1) + \"",
                     "%P_PHY_VALUE_DES%": "\" + (getPanStepper()->getPhysicalValueDescription()) + \"",
                     "%P_PHY_VALUE%": "\" + (getPanStepper()->getPhysicalValueInfo()) + \"",
@@ -159,7 +158,7 @@ TO_REPLACE = {
                     "%P_STEP_PIN%": "\" + String(PAN_STEPPER_PIN_STEP) + \"",
                     "%P_SLEEP_PIN%": "\" + String(PAN_STEPPER_PIN_SLEEP) + \"",
                     "%P_STEPS_PER_TURN%": "\" + String(STEPPER_STEPS_PER_TURN) + \"",
-                    "%P_CAN_CHANGE_RES%": "\" + (getPanStepper()->hasChangeResolutionMethod() ? \"Yes\" : \"No\") + \"",
+                    "%P_CAN_CHANGE_RES%": "\" + String(getPanStepper()->hasChangeResolutionMethod() ? \"Yes\" : \"No\") + \"",
                     "%P_DRIVER_M1%": "\" + String(PAN_STEPPER_DRIVER_M1) + \"",
                     "%P_DRIVER_M2%": "\" + String(PAN_STEPPER_DRIVER_M2) + \"",
                     "%P_DRIVER_M3%": "\" + String(PAN_STEPPER_DRIVER_M3) + \"",  
@@ -194,6 +193,8 @@ TO_REPLACE = {
                     "%TIMELAPSE_HEMISPHERE_NV%": "\" + String(!isTimelapseInNortherHemisphere() ? 1 : 0) +  \""
                 }
 def convert(file):
+    global fileContent
+
     if not "." in file:
         print("Convert {} failed (Ext not found) ".center(80, "-"))
         return 
@@ -203,20 +204,48 @@ def convert(file):
 
     content = content.replace("'", "**R**").replace("\"", "'").replace("**R**", "\\\"")
     for tore in TO_REPLACE: content = content.replace(tore, TO_REPLACE[tore])
-    content = content.replace("\n", "\";\n\tsite += \"").replace("\t", " ").replace("  ", " ")
- 
-    newFile = open(".".join(file.split(".")[0:-1]) + "_min." + file.split(".")[-1], "w+")
-    newFile.write("String site = \"" + content + "\";\n\n\treturn site;")
+    content = content.replace("\t", " ").replace("\n", "\");\n\tserver.sendContent(\"").replace("  ", " ")
+
+
+    filename = file.split(".")[0:-1]
+    fileContent += "\n\nvoid " + filename[0].capitalize() + "PageHandler(ESP8266WebServer& server) {\n"
+    fileContent += "\tserver.sendContent(\"" + content
+    fileContent = fileContent.replace("\"\"", "\"\\n\"")
+    fileContent += "\");\n}"
+
+def initFileContent():
+    global fileContent
+
+    fileContent = """
+#ifndef HTML_FILES_H
+#define HTML_FILES_H
+
+#include "common.h"
+#include "io.h"
+#include "stepper.h"
+#include "debug.h"
+    """
+
+def writeFile():
+    global fileContent
+
+    fileContent += "\n\n#endif"
+    
+    newFile = open("htmlFiles.h", "w+")
+    newFile.write(fileContent)
     newFile.close()
 
 def main():
+    initFileContent()
+
     files = getFiles()
 
     print(" Files: ".center(80, "-"))
     print(files)
 
     for file in files: convert(file)
-      
+
+    writeFile()
 
 
 if __name__ == "__main__":

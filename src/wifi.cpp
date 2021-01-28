@@ -21,7 +21,7 @@ std::vector<WiFiClient> streamClients;
 Ticker streamTimer;
 
 void handleNotFound() {
-    handleRoot();
+   handlePage(IndexPageHandler);
 }
 
 
@@ -48,36 +48,6 @@ String getStreamData() {
     stream += ", " + getIOBoard()->getBatteryStream();
 
     return stream + "}";
-}
-
-void handleRoot() {
-    //server.sendHeader("Location", "",true);   //Redirect to our html web page  
-    server.send(200, "text/html", getIndexPage());
-}
-
-void handleTimelapse() {
-    //server.sendHeader("Location", "",true);   //Redirect to our html web page  
-    server.send(200, "text/html", getTimelapsePage());
-}
-
-void handleAbout() {
-    server.send(200, "text/html", getAboutPage());
-}
-
-void handleSliderDetail() {
-    server.send(200, "text/html", getSliderdetailPage());
-}
-
-void handleSettings() {
-    server.send(200, "text/html", getSettingsPage());
-}
-
-void handleMainCss() {
-    server.send(200, "text/css", getMaincssPage());
-}
-
-void handleMainJS() {
-    server.send(200, "application/javascript", getMainjsPage());
 }
 
 void sendCommonHeaders() {
@@ -265,18 +235,18 @@ void serverRoutine() {
     keepAliveStream();
 }
 
-void handleGenericHTML(String page) {
-    server.send(200, "text/html", page);
-}
+void handlePage(std::function<void (ESP8266WebServer&)> handler, String type, bool cache) {
+    
+    if(cache){
+        server.sendHeader("Cache-Control", "max-age=31536000");
+    }
 
-void handleGenericCSS(String page) {
-    server.sendHeader("Cache-Control", "max-age=31536000");
-    server.send(200, "text/css", page);
-}
-
-void handleGenericJS(String page) {
-    server.sendHeader("Cache-Control", "max-age=31536000");
-    server.send(200, "application/json", page);
+    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+    server.send(200, type, "");
+    
+    handler(server);
+    
+    server.sendContent(F(""));
 }
 
 void serverSetup() {
@@ -289,26 +259,27 @@ void serverSetup() {
     IPAddress myIP = WiFi.softAPIP();
     debugMessage("serverSetup: IP = " + myIP.toString());
     
-    server.on("/", handleRoot);
-    server.on("/timelapse", handleTimelapse);
-    server.on("/settings", handleSettings);
-    server.on("/detail", handleSliderDetail);
-    server.on("/about", handleAbout);
-    server.on("/main.css", handleMainCss);
-    server.on("/main.js", handleMainJS);
-    server.onNotFound(handleRoot);
+    server.on("/", [](){ handlePage(IndexPageHandler); });
+    server.on("/timelapse", [](){ handlePage(TimelapsePageHandler); });
+    server.on("/settings", [](){ handlePage(SettingsPageHandler); });
+    server.on("/detail", [](){ handlePage(Slider_detailPageHandler); });
+    server.on("/about", [](){ handlePage(AboutPageHandler); });
+    //server.on("/main.css", [](){ handlePage(Mai); });
+    //server.on("/main.js", [](){ handlePage(main); });
+    server.onNotFound([](){ handlePage(IndexPageHandler); });
 
-    server.on("/app/", [](){ handleGenericHTML(getIndexAppPage()); });
-    server.on("/app/index.html", [](){ handleGenericHTML(getIndexAppPage()); });
-    server.on("/app/control.html", []() { handleGenericHTML(getControlAppPage()); });
-    server.on("/app/timelapse.html", []() { handleGenericHTML(getTimelapseAppPage()); });
-    server.on("/app/milkyway.html", []() { handleGenericHTML(getMilkywayAppPage()); });
-    server.on("/app/tracker.html", []() { handleGenericHTML(getTrackerAppPage()); });
-    server.on("/app/plan.html", []() { handleGenericHTML(getPlanAppPage()); });
-    server.on("/app/info.html", []() { handleGenericHTML(getInfoAppPage()); });
-    server.on("/app/mainCss.css", []() { handleGenericCSS(getMaincssAppPage()); });
-    server.on("/app/definesCss.css", []() { handleGenericCSS(getDefinescssAppPage()); });
-    server.on("/app/mainJs.js", []() { handleGenericJS(getMainjsAppPage()); });
+    server.on("/app/", [](){ handlePage(IndexAppPageHandler); });
+    server.on("/app/index.html", [](){ handlePage(IndexAppPageHandler); });
+    server.on("/app/control.html", []() { handlePage(ControlAppPageHandler); });
+    server.on("/app/timelapse.html", []() { handlePage(TimelapseAppPageHandler); });
+    server.on("/app/milkyway.html", []() { handlePage(MilkywayAppPageHandler); });
+    server.on("/app/tracker.html", []() { handlePage(TrackerAppPageHandler); });
+    server.on("/app/plan.html", []() { handlePage(PlanAppPageHandler); });
+    server.on("/app/info.html", []() { handlePage(InfoAppPageHandler); });
+    server.on("/app/mainCss.css", []() { handlePage(MaincssAppPageHandler, "text/css", true); });
+    server.on("/app/mainCss2.css", []() { handlePage(Maincss2AppPageHandler, "text/css", true); });
+    server.on("/app/definesCss.css", []() { handlePage(DefinescssAppPageHandler, "text/css", true); });
+    server.on("/app/mainJs.js", []() { handlePage(MainjsAppPageHandler, "application/json", true); });
 
     server.on("/device/all/", sliderRequestAll);
     server.on("/device/stream/", sliderRequestStream);

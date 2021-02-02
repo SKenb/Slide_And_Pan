@@ -21,40 +21,92 @@
         <div class="main-container">
             	
             <h2>&#128640; Slider</h2>
-            <p>
-                TODO
-            </p>
+            <br>
+            <div class="side-container-half">
+                <p>Name:</p><i>%SAP_NAME%</i>
+                <p>Version:</p><i>%SAP_VERSION%</i>
+                <p>Copyright:</p><i>%SAP_CR%</i>
+                <p>ID:</p><i>%SAP_ID%</i>
+            </div>
 
             <br><br>
 
             <h2>&#128199; Author</h2>
+            <br>
             <p>
-                TODO
+                My name is <i>Sebastian Knoll</i> and I am the inventor and author of this project. 
+                If you have any question regarding me or the app do not hesitate to 
+                <a target="_blank" href="https://sebastianknoll.net/me/contact.php">contact me</a> or visit my 
+                <a target="_blank" href="https://sebastianknoll.net/">homepage</a>. 
+                <br>
+                <br>
+                If you have any legal concerns, note that this is an private application 
+                which you can use at your own risk. Furthermore you can checkout 
+                <a target="_blank" href="https://sebastianknoll.net/gtc/">legal stuff</a> and 
+                <a target="_blank" href="https://sebastianknoll.net/slide/gtc">legal stuff for Slide and Pan</a>.
             </p>
 
             <br><br>
 
             
             <h2>&#127759; More</h2>
+            <br>
             <p>
-                TODO
+                <p>
+                Use the Hashtag <a target="_blank" href="https://www.instagram.com/explore/tags/slideandpan/">#slideandpan</a> so that I can see your amazing work.
+                </p>
+                <br>
+                <p>Use the <a target="_blank" href="%HANDBOOK%">Handbook</a> for more information and tutorials.</p>
+                <br>
+                <p>Have a look at my work <a target="_blank" href="https://sebastianknoll.net/photo">here</a>.</p>
+                <br>
             </p>
 
             <br><br>
 
             <h2>&#9874; Hardware</h2>
-            <p>
-                TODO
-            </p>
+            <h3 style="text-align: left;">Slide</h3>
+            <br>
+            <div class="side-container-half">
+                <p>Direction Pin:</p><i>%S_DIR_PIN%</i>
+                <p>Step Pin:</p><i>%S_STEP_PIN%</i>
+                <p>Sleep Pin:</p><i>%S_SLEEP_PIN%</i>
+                <p>Steps / Turn:</p><i>%S_STEPS_PER_TURN%</i>
+                <p>Can change res.:</p><i>%S_CAN_CHANGE_RES%</i>
+                <p>Driver M1 Pin:</p><i>%S_DRIVER_M1%</i>
+                <p>Driver M2 Pin:</p><i>%S_DRIVER_M2%</i>
+                <p>Driver M3 Pin:</p><i>%S_DRIVER_M3%</i>
+            </div>
+
+            <br>
+
+            <h3 style="text-align: left;">Pan</h3>
+            <br>
+            <div class="side-container-half">
+                <p>Direction Pin:</p><i>%P_DIR_PIN%</i>
+                <p>Step Pin:</p><i>%P_STEP_PIN%</i>
+                <p>Sleep Pin:</p><i>%P_SLEEP_PIN%</i>
+                <p>Steps / Turn:</p><i>%P_STEPS_PER_TURN%</i>
+                <p>Can change res.:</p><i>%P_CAN_CHANGE_RES%</i>
+                <p>Driver M1 Pin:</p><i>%P_DRIVER_M1%</i>
+                <p>Driver M2 Pin:</p><i>%P_DRIVER_M2%</i>
+                <p>Driver M3 Pin:</p><i>%P_DRIVER_M3%</i>
+            </div>
+           
+            <br><br>
+            <h2>&#128655; Constants</h2>
+            <br>
+            <div class="side-container-half">
+                <p>Gear diameter:</p> <i>%SLIDE_GEAR_DIAMETER%</i>
+                <p>Gear cog number: </p><i>%PAN_GEAR_SMALL_COG_NUMBER%</i>
+                <p>Big gear cog number: </p><i>%PAN_GEAR_LARGE_COG_NUMBER%</i>
+                <p>Earth rotation: </p><i>%EARTH_TIME_PER_DAY%</i>
+                <p>Moon rotation: </p><i>%MOON_TIME_PER_TURN%</i>
+            </div>
 
             <br><br>
-	
-            <h2>&#128655; Constants</h2>
-            <p>
-                TODO
-            </p>
-
             <h2>&#128213; Logs</h2>
+            <br>
             <div style="overflow-x: scroll; padding-bottom: 10px;">
                 <p style="display: inline; white-space: nowrap; overflow-x: scroll;">
                     %LOGS%

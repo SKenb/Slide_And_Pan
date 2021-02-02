@@ -14,6 +14,8 @@ int32_t getEncoderRotation();
 
 int32_t getEncoderDeltaRotation();
 
+bool isEncoderPressed();
+
 String getIOJsonData(String tabString);
 
 String getEncoderJsonData(String tabString);

@@ -43,7 +43,6 @@ class IOBoard {
 
     void setup();
 
-    void readInput();
 
     void commonTick();
     void blinkTick();
@@ -63,6 +62,8 @@ class IOBoard {
             ioport_t numInputs);
 
     void applyOutputState();
+
+    void readInput();
 
     void setOutput(ioport_t port, ioport_level_t level);
     unsigned int getOutputState(ioport_t port);
@@ -96,6 +97,7 @@ class IOBoard {
     gTime_t getTimeCounter() { return timeCounter; }
 
     int cameraGetStatus() { return cameraStatus; }
+    String cameraGetStatusString();
     bool isCameraReadyForPhoto() { return cameraStatus == CAM_STATE_IDLE; }
     void cameraTakePhoto() { if(isCameraReadyForPhoto()) cameraStatus = CAM_STATE_PREPARE; }
     void cameraSetExposureTime(gTime_t exposureTime) { cameraExposureTime = exposureTime; }

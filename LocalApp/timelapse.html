@@ -18,70 +18,77 @@
         <div class="option-container">
             
             <p>Photos:</p>
-            <input>
+            <input value="%PC%" type="number" min="0" max="5000" id="count">
             <p class="small">#</p>
 
             <p>Slide:</p>
-            <input>
+            <input value="%SLIDE%" type="number" step="0.001" min="-5000" max="5000" id="slide">
             <p class="small">mm / Step</p>
 
             <p>Pan:</p>
-            <input>
+            <input value="%PAN%" type="number" step="0.001" min="-5000" max="5000" id="pan">
             <p class="small">° / Step</p>
 
             <p>Photo interval:</p>
-            <input>
+            <input value="%EXP%" type="number" step="0.1" min="0" max="500" id="photo">
             <p class="small">s / Photo</p>
 
             <p>Step time:</p>
-            <input>
+            <input value="%INT%" type="number" min="0" max="500" id="interval">
             <p class="small">s / Step</p>
         </div>
 
+        <div class="button main"
+            onclick="makeRequest('timelapse_slide=' + document.getElementById('slide').value + '&timelapse_count=' + document.getElementById('count').value + '&timelapse_photo=' + document.getElementById('photo').value + '&timelapse_interval=' + document.getElementById('interval').value + '&timelapse_pan=' + document.getElementById('pan').value, true);">
+            &#129517; Update settings
+        </div>
         <div class="side-container">
-            <div class="button main">&#128640; Start Timelapse</div>
-            <div class="button main">&#10060;</div>
-            <div class="button main">&#129488; Preview</div>
-            <div class="button main">&#10060;</div>
+            <div class="button main"
+                onclick="makeRequest('timelapse_slide=' + document.getElementById('slide').value + '&timelapse_count=' + document.getElementById('count').value + '&timelapse_photo=' + document.getElementById('photo').value + '&timelapse_interval=' + document.getElementById('interval').value + '&timelapse_pan=' + document.getElementById('pan').value + '&timelapse_start');">
+                &#128640; Start Timelapse
+            </div>
+            <div class="button main" onclick="makeRequest('timelapse_stop');">&#10060;</div>
+            <div class="button main"
+                onclick="makeRequest('timelapse_slide=' + document.getElementById('slide').value + '&timelapse_count=' + document.getElementById('count').value + '&timelapse_photo=' + document.getElementById('photo').value + '&timelapse_interval=' + document.getElementById('interval').value + '&timelapse_pan=' + document.getElementById('pan').value + '&timelapse_preview_start');">
+                &#129488; Preview
+            </div>
+            <div class="button main" onclick="makeRequest('timelapse_preview_stop');">&#10060;</div>
         </div>
 
         <br><br>
         <h1>&#127916; Info</h1>
 
-        <div class="option-container">
-            
+        <br>
+
+        <div class="side-container-half">
+
             <p>Total time:</p>
-            <p>213413241234 1234 1234 1234 2</p>
-            <p class="small"></p>
+            <p><i>%TIMELAPSE_TOTAL_TIME%</i></p>
 
             <p>End time:</p>
-            <p></p>
-            <p class="small"></p>
+            <p><i>%TIMELAPSE_END_TIME%</i></p>
 
-            <p></p><p></p><p></p>
+            <p></p><p></p>
 
             <p>Total Slide:</p>
-            <p></p>
-            <p class="small"></p>
+            <p><i>%TIMELAPSE_TOTAL_SLIDE%</i> %S_PHY_VALUE_UNIT%</p>
 
             <p>Total Pan:</p>
-            <p></p>
-            <p class="small"></p>            
+            <p><i>%TIMELAPSE_TOTAL_PAN%</i> %P_PHY_VALUE_UNIT%</p>           
             
-            <p></p><p></p><p></p>
+            <p></p><p></p>
 
             <p>Video (24fps):</p>
-            <p></p>
-            <p class="small"></p>
+            <p><i>%TIMELAPSE_VIDEO_LENGTH_24FPS%</i></p>
+
             <p>Video (25fps):</p>
-            <p></p>
-            <p class="small"></p>
+            <p><i>%TIMELAPSE_VIDEO_LENGTH_25FPS%</i></p>
+
             <p>Video (30fps):</p>
-            <p></p>
-            <p class="small"></p>
+            <p><i>%TIMELAPSE_VIDEO_LENGTH_30FPS%</i></p>
+
             <p>Video (60fps):</p>
-            <p></p>
-            <p class="small"></p>
+            <p><i>%TIMELAPSE_VIDEO_LENGTH_60FPS%</i></p>
         </div>
 
         <div class="closer"></div>

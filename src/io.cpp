@@ -5,6 +5,8 @@ IOBoard* ioBoard;
 
 int32_t encoderRotation = 0; 
 int32_t oldEncoderRotation = 0;
+bool encoderPressed = false;
+
 unsigned int dir = 0;
 unsigned int prevClk = 0;
 
@@ -14,8 +16,11 @@ void setupIOBoard() {
   ioBoard = new IOBoard(PIN_LATCH, PIN_CLOCK, PIN_DATAOUT, 16,
                         PIN_LATCHIN, PIN_DATAIN, 8);
 
-  /*ioBoard->enableAutoRead(1);
-  ioBoard->addOnPortChangeHandler(ENCODER_PIN_SWITCH, [](ioport_level_t level){ debugMessage("Toggled switch: " + String(level) + "\tRotation: " + String(encoderRotation)); });
+  //ioBoard->enableAutoRead(10);
+  ioBoard->addOnPortChangeHandler(ENCODER_PIN_SWITCH, [](ioport_level_t level){ 
+    encoderPressed = level <= 0;
+  });
+
   ioBoard->addOnChangeHandler([ioBoard](unsigned int changed_values){ 
 
     ioport_level_t direction = ioBoard->getInputState(ENCODER_PIN_CLK);
@@ -26,7 +31,7 @@ void setupIOBoard() {
     if(!clk && prevClk) encoderRotation += direction ? 1 : -1;
     
     prevClk = clk;
-  });*/
+  });
 
 }
 
@@ -56,6 +61,9 @@ String getEncoderJsonData(String tabString) {
 
     return json + tabString +"}";
 }
+
+
+bool isEncoderPressed() { return encoderPressed; }
 
 void takePhoto(unsigned int time) {
   getIOBoard()->setAndApplyOutput(PIN_CAM, HIGH);

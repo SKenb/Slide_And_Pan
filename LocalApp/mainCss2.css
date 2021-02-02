@@ -186,8 +186,19 @@ input {
     display: inline-table
 }
 
+
+.side-container-half {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 10px;
+    width: 80%;
+    height: auto;
+    margin: auto;
+}
+
 .small {
     font-size: .75em;
+    margin-left: 20px;
 }
 
 .closer {

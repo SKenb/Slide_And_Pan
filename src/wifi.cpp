@@ -124,9 +124,17 @@ String handleRequestParameter(String paramName, String paramValue, String tabStr
         return "Timelapse interval set to: " + String(paramValue.toInt());
     }
 
-    if(paramName == COMMAND_TIMELAPSE_PHOTO) {
+    if(paramName == COMMAND_TIMELAPSE_PHOTO ||
+       paramName == COMMAND_PHOTO_SET_EXP) 
+    {
         getIOBoard()->cameraSetExposureTime(paramValue.toFloat());
         return "Timelapse exposure time set to: " + String(paramValue.toInt());
+    }
+
+
+    if(paramName == COMMAND_PHOTO_TRIGGER) {
+        getIOBoard()->cameraTakePhoto();
+        return "Triggered photo (" + String(getIOBoard()->getCameraExposureTime()) + "s)";
     }
 
     if(paramName == COMMAND_TIMELAPSE_COUNT) {
@@ -211,6 +219,7 @@ void streamData(String data) {
     while(it != streamClients.end()) {
 
         if (it->connected()) {
+            it->setTimeout(10);
             it->printf_P(PSTR("event: event\ndata: %s\n\n"), data.c_str());
             it++;
         }
@@ -218,6 +227,7 @@ void streamData(String data) {
             it = streamClients.erase(it);
             debugMessage("One stream client left");
         }
+
     }
 }
 

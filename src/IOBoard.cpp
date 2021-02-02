@@ -132,6 +132,17 @@ String IOBoard::getBatteryStream() {
     return stream + "}";
 }
 
+
+String IOBoard::cameraGetStatusString() {
+    switch(cameraGetStatus()) {
+        case CAM_STATE_IDLE: return "idle";
+        case CAM_STATE_PHOTO: return "photo";
+        case CAM_STATE_PREPARE: return "prepare";
+        case CAM_STATE_REST: return "rest";
+        default: return "?";
+    }
+}
+
 void IOBoard::applyOutputState() {
     
     digitalWrite(latchPin, LOW);

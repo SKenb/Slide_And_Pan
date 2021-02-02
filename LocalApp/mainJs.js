@@ -88,6 +88,7 @@ function updateGUIFromStramData() {
 
     heartBeat();
     updateBattery(streamData["battery"]);
+    updatePowerState(streamData["slide"]["Sleeping"], streamData["pan"]["Sleeping"])
 
     for (var classOI in classPathMap) {
         if (classPathMap.hasOwnProperty(classOI)) {      
@@ -140,6 +141,37 @@ function updateBattery(batteryData) {
     }
 }
 
+function updateCameraState() {
+    var inner = '&#128247; ?';
+    
+    var state = streamData ? streamData["state"]["camera"].toLowerCase() : "";
+    
+    switch(state) {
+        case 'photo': 
+            inner = '&#128248; Shoot';
+            break;
+
+        case 'idle': 
+            inner = '&#128247;';
+            break;
+            
+        case 'prepare': 
+            inner = '&#128247; Prepare';
+            break;
+            
+        case 'rest': 
+            inner = '&#128247; Rest';
+            break;
+            
+        case '?': 
+            inner = '&#128247; ?! :0';
+            break;
+    }
+
+    let el = document.getElementById('camera-state');
+    if(el) el.innerHTML = inner;
+}
+
 var heartBeatCount = 0;
 function heartBeat() {
     heartBeatCount = 6;
@@ -159,7 +191,17 @@ function setInnerConnection(antenne) {
     } catch (error) { }
 }
 
+function updatePowerState(slideState, panState) {
+    mapState = (state) => (state.toLowerCase() == 'yes') ? '&#128164;' : '&#128170;';
+    slideState = mapState(slideState);
+    panState = mapState(panState);
+
+    document.getElementById('power-state').innerHTML = slideState + " / " + panState;
+}
+
 setInterval(function() {
+    updateCameraState()
+
     heartBeatCount--;
     if(heartBeatCount<=0) {
         streamData = null;

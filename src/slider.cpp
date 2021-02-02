@@ -49,7 +49,8 @@ String getSliderSubStateString() {
 
 String getStatusStreamData() {
     String stream = "\"state\": { \"state\": \"" + getSliderStateString() + "\"";
-    stream += ", \"detail\": \"" + getSliderSubStateString() + "\"}";
+    stream += ", \"detail\": \"" + getSliderSubStateString() + "\"";
+    stream += ", \"camera\": \"" + getIOBoard()->cameraGetStatusString() + "\"}";
 
     return stream;
 }
@@ -188,7 +189,7 @@ void timelapseRoutine()
             break;
        
         case TIMELAPSE_STATE_TRIGGER_SHOOT:
-            //getIOBoard()->cameraTakePhoto();
+            getIOBoard()->cameraTakePhoto();
             timelapsePhotoCount--;
             
             waitUntil = getTime() + timelapseIntervalTime;

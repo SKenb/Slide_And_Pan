@@ -95,7 +95,7 @@ TO_REPLACE = {  "%STATE%": "\" + getSliderStateString() + \"",
                 "%LOGS%": "\" + getRingBufferForWeb() + \"",
                 "%BATTERY_LVL%": "\" + String(getIOBoard()->getBatteryLevel()) + \"",
                 "%TIMELAPSE_HEMISPHERE%": "\" + String(isTimelapseInNortherHemisphere() ? \"Northern\" : \"South\") + \"",
-                "%TIMELAPSE_HEMISPHERE_NV%": "\" + String(!isTimelapseInNortherHemisphere() ? 1 : 0) +  \""
+                "%TIMELAPSE_HEMISPHERE_NV%": "\" + String(!isTimelapseInNortherHemisphere() ? 1 : 0) + \""
             }
 
 fileContent = ""
@@ -110,15 +110,15 @@ def convert(file):
     content = open(file, "r").read()
 
     content = content.replace("'", "**R**").replace("\"", "'").replace("**R**", "\\\"")
-    for tore in TO_REPLACE: content = content.replace(tore, TO_REPLACE[tore])
-    content = content.replace("\t", " ").replace("\n", "\");\n\tserver.sendContent(\"").replace("  ", " ")
-
+    content = content.replace("\t", " ").replace("\n", "\"));\n\tserver.sendContent(F(\"").replace("  ", " ")
+    for tore in TO_REPLACE: 
+        content = content.replace(tore, TO_REPLACE[tore].replace("\" +", "\"));\n\tserver.sendContent(").replace("+ \"", ");\n\tserver.sendContent(F(\""))
 
     filename = file.split(".")[0:-1]
     fileContent += "\n\nvoid " + filename[0].capitalize() + "AppPageHandler(ESP8266WebServer& server) {\n"
-    fileContent += "\tserver.sendContent(\"" + content
+    fileContent += "\tserver.sendContent(F(\"" + content
     fileContent = fileContent.replace("\"\"", "\"\\n\"")
-    fileContent += "\");\n}"
+    fileContent += "\"));\n}"
 
 def initFileContent():
     global fileContent

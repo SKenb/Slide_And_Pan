@@ -23,12 +23,16 @@
             &#128678; <span class="insertSTATE" id="status" onclick="document.getElementById('status-bar-detail').classList.toggle('open');"></span>
         </div>
 
-        <div id="e-stop" onclick="makeRequest('slide_stop&pan_stop');">
+        <div id="e-stop" onclick="makeRequest('slide_stop&pan_stop&timelapse_stop');">
             <p>E-STOP</p>
         </div>
 
         <div class="status right">
-            <p><span id="connection">&#128225;</span> &#128247; <span id="camera">READY</span></p>
+            <p>
+                <span id="connection">&#128225;</span>
+                <span id="power-state">. / ..</span> 
+                <span id="camera-state">&#128247;</span>
+            </p>
         </div>
     </div>
 
@@ -39,15 +43,23 @@
         <hr>
         <br>
         <p style="text-align: center; font-size: 2em;">
-            <span class="insertSLIDEPOS">?</span>cm / 
-            <span class="insertPANPOS">?</span>°
+            <span class="insertSLIDEPOS">?</span>%S_PHY_VALUE_UNIT% / 
+            <span class="insertPANPOS">?</span>%P_PHY_VALUE_UNIT%
         </p>
         <br>
         <div class="side-container">
             <div class="button main" onclick="makeRequest('slide_reset&pan_reset');">&#127919; Set as Home</div>
             <div class="button main" onclick="makeRequest('pan_physical_value=0&slide_physical_value=0');">&#127969;</div>
+            <div class="button main" onclick="makeRequest('slide_sleep=1&pan_sleep=1');">&#9889; Stepper power On</div>
+            <div class="button main" onclick="makeRequest('slide_sleep=0&pan_sleep=0');">OFF</div>
+            <div></div><div></div>
+            <div class="button main" onclick="makeRequest('slide_lazy=0');">&#128170; Set Slide strong</div>
+            <div class="button main" onclick="makeRequest('slide_lazy=1');">Lazy</div>
+            <div class="button main" onclick="makeRequest('pan_lazy=0');">&#128170; Set Pan strong</div>
+            <div class="button main" onclick="makeRequest('pan_lazy=1');">Lazy</div>
         </div>
         <br><br>
+        <hr>
         <br><br>
         <div class="section">
             <h3>Slide to:</h3>
@@ -61,8 +73,14 @@
                 <input type="number" value="%P_PHY_VALUE%" step="0.001" min="-50000" max="50000" id="pan_pv">
                 <div class="button main" onclick="makeRequest('pan_physical_value=' + document.getElementById('pan_pv').value);">&#128681;</div>
             </div>
+            <br>
+            <h3>Trigger photo:</h3>
+            <div class="side-container">
+                <input type="number" value="%EXP%" step="0.01" min="0.01" max="50000" id="g_exp">
+                <div class="button main" onclick="makeRequest('photo_set_exp=' + document.getElementById('g_exp').value + '&photo_trigger=1');">&#128248;</div>
+            </div>
         </div>
-
+        
         <div class="closer"></div>
     </div>
 

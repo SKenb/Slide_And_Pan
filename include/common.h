@@ -53,6 +53,9 @@
 #define COMMAND_SET_TIME "set_time"
 #define COMMAND_SET_DARKMODE "set_darkmode"
 
+#define COMMAND_PHOTO_SET_EXP "photo_set_exp"
+#define COMMAND_PHOTO_TRIGGER "photo_trigger"
+
 #define COMMAND_TIMELAPSE_START "timelapse_start"
 #define COMMAND_TIMELAPSE_STOP "timelapse_stop"
 #define COMMAND_TIMELAPSE_PREVIEW_START "timelapse_preview_start"
@@ -162,7 +165,9 @@ const String AVAILABLE_COMMANDS[] = {
         COMMAND_TIMELAPSE_SLIDE,
         COMMAND_TIMELAPSE_PAN,
         COMMAND_TIMELAPSE_INTERVAL,
-        COMMAND_TIMELAPSE_COUNT
+        COMMAND_TIMELAPSE_COUNT,
+        COMMAND_PHOTO_SET_EXP,
+        COMMAND_PHOTO_TRIGGER
     };
 
 

@@ -1,0 +1,117 @@
+<!doctype html>
+
+<html lang="en">
+
+%HEAD%
+
+<body>
+    
+    %STYLE%
+
+    %SCRIPT%
+
+    <div id="container">
+        <h1>Timelapse</h1>
+
+        <ul>
+            <li><a href="index">Control</a></li>
+            <li><a href="timelapse">Timelapse</a></li>
+            <li><a href="settings">Settings</a></li>
+        </ul>
+
+        <br>
+
+        <div class="section">
+            <h2>Milkyway</h2>
+            <br>
+            <p style="display: inline-block;">Slide:</p> 
+            <input value="%SLIDE%" step="0.001" min="-5000" max="5000" id="mw_slide"> %S_PHY_VALUE_UNIT%
+            <br>
+            <p style="display: inline-block;">Photo count:</p>
+            <input value="%PC%" min="0" max="5000" id="mw_count"> #
+            <br>
+            <p style="display: inline-block;">Exposure Time:</p>
+            <input value="%EXP%" step="0.1" min="0" max="500" id="mw_photo"> s
+            <br>
+            <p style="display: inline-block;">Interval Time:</p> 
+            <input value="%INT%" min="0" max="500" id="mw_interval"> s
+            <br>
+            <p style="display: inline-block;">Hemisphere: <a href="#" onclick="makeRequest('timelapse_set_hemisphere=%TIMELAPSE_HEMISPHERE_NV%');"><i>%TIMELAPSE_HEMISPHERE%</i></a></p> 
+            <br>
+            <button class="block" onclick="makeRequest('timelapse_slide=' + document.getElementById('mw_slide').value + '&timelapse_count=' + document.getElementById('mw_count').value + '&timelapse_photo=' + document.getElementById('mw_photo').value + '&timelapse_interval=' + document.getElementById('mw_interval').value + '&timelapse_milkyway_settings=1');">Shoot Milkyway</button>
+            <br>
+            <br>
+            <p style="display: inline-block;">Pan set to: %PAN%%P_PHY_VALUE_UNIT%</p>
+            <br>
+        </div>
+
+        <br><br>
+
+        <div class="section">
+            <h2>Start / Stop</h2>
+            <br>
+            <button class="block" onclick="makeRequest('timelapse_start');">Start Timelapse</button>
+            <br>
+            <button class="block" onclick="makeRequest('timelapse_stop');">Stop Timelapse</button>
+            <br>
+            <br>
+            <button class="block" onclick="makeRequest('timelapse_preview_start');">Start Preview</button>
+            <br>
+            <button class="block" onclick="makeRequest('timelapse_preview_stop');">Stop Preview</button>
+            <br>
+        </div>
+
+        <br><br>
+
+        <div class="section">
+            <h2>Manual</h2>
+            <br>
+            <input value="%PAN%" type="number" step="0.001" min="-5000" max="5000" id="pan"> %P_PHY_VALUE_UNIT%
+            <button class="set_button" onclick="makeRequest('timelapse_pan=' + document.getElementById('pan').value);">Set Pan</button>
+            <br>
+            <input value="%SLIDE%" type="number" step="0.001" min="-5000" max="5000" id="slide"> %S_PHY_VALUE_UNIT%
+            <button class="set_button" onclick="makeRequest('timelapse_slide=' + document.getElementById('slide').value);">Set Slide</button>
+            <br>
+            <input value="%PC%" min="0" max="5000" id="count"> #
+            <button class="set_button" onclick="makeRequest('timelapse_count=' + document.getElementById('count').value);">Set Picture count</button>
+            <br>
+            <input value="%EXP%" step="0.1" min="0" max="500" id="photo"> s
+            <button class="set_button" onclick="makeRequest('timelapse_photo=' + document.getElementById('photo').value);">Set Photo Interval</button>
+            <br>
+            <input value="%INT%" min="0" max="500" id="interval"> s
+            <button class="set_button" onclick="makeRequest('timelapse_interval=' + document.getElementById('interval').value);">Set Timelapse interval</button>
+            <br>
+            <br>
+            <button class="block" onclick="makeRequest('timelapse_slide=' + document.getElementById('slide').value + '&timelapse_count=' + document.getElementById('count').value + '&timelapse_photo=' + document.getElementById('photo').value + '&timelapse_interval=' + document.getElementById('interval').value + '&timelapse_pan=' + document.getElementById('pan').value);">Set all</button>
+            <br>
+        </div>
+
+        <br><br>
+
+        <div class="section">
+            <h2>Timelapse-Info</h2>
+
+            <br>
+            <p>Total time: <i>%TIMELAPSE_TOTAL_TIME%</i></p>
+            <p>End time: <i>%TIMELAPSE_END_TIME%</i></p>
+            <br>
+            <p>Total slide: <i>%TIMELAPSE_TOTAL_SLIDE%</i> %S_PHY_VALUE_UNIT%</p>
+            <p>Total pan: <i>%TIMELAPSE_TOTAL_PAN%</i> %P_PHY_VALUE_UNIT%</p>
+            <br>
+            <p>Video length (24fps): <i>%TIMELAPSE_VIDEO_LENGTH_24FPS%</i></p>
+            <p>Video length (25fps): <i>%TIMELAPSE_VIDEO_LENGTH_25FPS%</i></p>
+            <p>Video length (30fps): <i>%TIMELAPSE_VIDEO_LENGTH_30FPS%</i></p>
+            <p>Video length (60fps): <i>%TIMELAPSE_VIDEO_LENGTH_60FPS%</i></p>
+            <br>
+        </div>
+    </div>
+
+    <br>
+    <br>
+
+    <a style="text-align: center; display: block;" href="about">About</a>
+
+    <br>
+    <br>
+</body>
+</html>

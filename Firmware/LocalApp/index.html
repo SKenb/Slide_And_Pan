@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head style="overflow: hidden;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide and Pan</title>
+
+    <link rel="stylesheet" href="definesCss.css">
+    <link rel="stylesheet" href="mainCss.css">
+    <link rel="stylesheet" href="mainCss2.css">
+
+    <script src="mainJs.js"></script>
+</head>
+<body style="overflow: hidden;">
+    <div id="status-bar">
+        <div id="battery">
+            <div id="battery-plus-pole"></div>
+            <div id="battery-fill"></div>
+            <div id="battery-glas"></div>
+        </div>
+
+        <div class="status left">
+            &#128678; <span class="insertSTATE" id="status" onclick="document.getElementById('status-bar-detail').classList.toggle('open');"></span>
+        </div>
+
+        <div id="e-stop" onclick="makeRequest('slide_stop&pan_stop&timelapse_stop');">
+            <p>E-STOP</p>
+        </div>
+
+        <div class="status right">
+            <p>
+                <span id="connection">&#128225;</span>
+                <span id="power-state">. / ..</span> 
+                <span id="camera-state">&#128247;</span>
+            </p>
+        </div>
+    </div>
+
+    <div id="status-bar-detail">
+        <h1 class="insertSTATE"></h1>
+        <p class="insertSTATEDETAIL"></p>
+        <br><br>
+        <hr>
+        <br>
+        <p style="text-align: center; font-size: 2em;">
+            <span class="insertSLIDEPOS">?</span>%S_PHY_VALUE_UNIT% / 
+            <span class="insertPANPOS">?</span>%P_PHY_VALUE_UNIT%
+        </p>
+        <br>
+        <div class="side-container">
+            <div class="button main" onclick="makeRequest('slide_reset&pan_reset');">&#127919; Set as Home</div>
+            <div class="button main" onclick="makeRequest('pan_physical_value=0&slide_physical_value=0');">&#127969;</div>
+            <div class="button main" onclick="makeRequest('slide_sleep=1&pan_sleep=1');">&#9889; Stepper power On</div>
+            <div class="button main" onclick="makeRequest('slide_sleep=0&pan_sleep=0');">OFF</div>
+            <div></div><div></div>
+            <div class="button main" onclick="makeRequest('slide_lazy=0');">&#128170; Set Slide strong</div>
+            <div class="button main" onclick="makeRequest('slide_lazy=1');">Lazy</div>
+            <div class="button main" onclick="makeRequest('pan_lazy=0');">&#128170; Set Pan strong</div>
+            <div class="button main" onclick="makeRequest('pan_lazy=1');">Lazy</div>
+        </div>
+        <br><br>
+        <hr>
+        <br><br>
+        <div class="section">
+            <h3>Slide to:</h3>
+            <div class="side-container">
+                <input type="number" value="%S_PHY_VALUE%" step="0.001" min="-50000" max="50000" id="slide_pv">
+                <div class="button main" onclick="makeRequest('slide_physical_value=' + document.getElementById('slide_pv').value);">&#128681;</div>
+            </div>
+            <br>
+            <h3>Pan to:</h3>
+            <div class="side-container">
+                <input type="number" value="%P_PHY_VALUE%" step="0.001" min="-50000" max="50000" id="pan_pv">
+                <div class="button main" onclick="makeRequest('pan_physical_value=' + document.getElementById('pan_pv').value);">&#128681;</div>
+            </div>
+            <br>
+            <h3>Trigger photo:</h3>
+            <div class="side-container">
+                <input type="number" value="%EXP%" step="0.01" min="0.01" max="50000" id="g_exp">
+                <div class="button main" onclick="makeRequest('photo_set_exp=' + document.getElementById('g_exp').value + '&photo_trigger=1');">&#128248;</div>
+            </div>
+        </div>
+        
+        <div class="closer"></div>
+    </div>
+
+    <div id="select" class="select wheel">
+        <div class="select option option1" onclick="select(1);"><p>&#127918;</p></div>
+        <div class="select option option2" onclick="select(2);"><p>&#9202;</p></div>
+        <div class="select option option3" onclick="select(3);"><p>&#127775;</p></div>
+        <div class="select option option4" onclick="select(4);"><p>&#128301;</p></div>
+        <div class="select option option5" onclick="select(5);"><p>&#128203;</p></div>
+        <div class="select option option6" onclick="select(6);"><p>&#128209;</p></div>
+    </div>
+
+
+    <iframe id="iframe" src="" frameBorder="0"></iframe>
+    <script>select(2); startStreamListener();</script>
+</body>
+</html>

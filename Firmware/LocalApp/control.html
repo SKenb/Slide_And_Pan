@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control</title>
+
+    <link rel="stylesheet" href="definesCss.css">
+    <link rel="stylesheet" href="mainCss.css">
+    <link rel="stylesheet" href="mainCss2.css">
+
+    <script src="mainJs.js"></script>
+</head>
+<body>
+    <div class="content">
+        <div class="vspace"></div>
+        <h1>&#127918; Control</h1>
+        <p style="text-align: center; font-size: .7em;">
+            <span class="insertSLIDEPOS">?</span>%S_PHY_VALUE_UNIT% / 
+            <span class="insertPANPOS">?</span>%P_PHY_VALUE_UNIT%</p>
+        <div class="control-container">
+            <div></div>
+            <div><div class="button" onclick="makeRequest('slide_to=1000000');">&#11014;</div></div>
+            <div></div>
+
+            <div><div class="button" onclick="makeRequest('pan_to=1000000');">&#8618;</div></div>
+            <div><div class="button stop" onclick="makeRequest('slide_stop&pan_stop');"><p>STOP</p></div></div>
+            <div><div class="button" onclick="makeRequest('pan_to=-1000000');">&#8617;</div></div>
+
+            <div></div>
+            <div><div class="button" onclick="makeRequest('slide_to=-1000000');">&#11015;</div></div>
+            <div><div class="button" onclick="makeRequest('slide_to=0&pan_to=0');">&#127969;</div></div>
+        </div>
+
+        <div class="main-container">
+            <h3>&#128640; Speed</h3>
+            <p style="text-align: center;" id="speed-selection">Fast</p>
+            <input type="range" min="1" max="4" value="2" class="slider" id="myRange" 
+                    style="padding: 0; display: block;"
+                    onchange="changeSpeed(this);">
+
+            <br><br>
+            <br><br>
+            <h3>&#128268; Stepper Power</h3>
+            <br><br>
+            <div class="side-container">
+                <div class="button main" onclick="makeRequest('slide_sleep=1&pan_sleep=1');">&#9889; Power On</div>
+                <div class="button main" onclick="makeRequest('slide_sleep=0&pan_sleep=0');">OFF</div>
+            </div>
+        </div>
+
+    
+        
+    </div>
+    
+    <div class="closer"></div>
+</body>
+</html>

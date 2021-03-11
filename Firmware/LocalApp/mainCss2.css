@@ -1,0 +1,228 @@
+.select.wheel.option1 {
+    transform: translate(-50%, var(--select-top-pos)) rotate(20deg);
+}
+
+.select.wheel.option2 {
+    transform: translate(-50%, var(--select-top-pos)) rotate(0deg);
+}
+
+.select.wheel.option3 {
+    transform: translate(-50%, var(--select-top-pos)) rotate(-20deg);
+}
+
+.select.wheel.option4 {
+    transform: translate(-50%, var(--select-top-pos)) rotate(-40deg);
+}
+
+.select.wheel.option5 {
+    transform: translate(-50%, var(--select-top-pos)) rotate(-60deg);
+}
+
+
+.select.wheel.option6 {
+    transform: translate(-50%, var(--select-top-pos)) rotate(-80deg);
+}
+
+.select.option {
+    width: 200vw;
+    height: 200vw;
+    min-width: 500px;
+    min-height: 500px;
+    max-width: 960px;
+    max-height: 960px;
+    
+    color: var(--color-front1);
+    font-size: 2em;
+
+    background-color: transparent;
+    border: none;
+    position: fixed;
+
+    text-align: center;
+    padding-top: 10px;
+
+    pointer-events: none;
+}
+
+.select.option p {
+    pointer-events: all;
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px;
+}
+
+.select.option p:hover {
+    color: var(--color-front2);
+}
+
+.select.option.option1 {
+    transform: rotate(-20deg);
+    z-index: 20;
+}
+
+.select.option.option2 {
+    transform: rotate(0deg);
+    z-index: 21;
+}
+
+.select.option.option3 {
+    transform: rotate(20deg);
+    z-index: 22;
+}
+
+.select.option.option4 {
+    transform: rotate(40deg);
+    z-index: 22;
+}
+
+.select.option.option5 {
+    transform: rotate(60deg);
+    z-index: 22;
+}
+
+.select.option.option6 {
+    transform: rotate(80deg);
+    z-index: 22;
+}
+
+iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    margin-top: 30px;
+}
+
+.control-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 10px 10px;
+
+    width: 80%;
+    margin: 50px auto;
+}
+
+.option-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 5px 10px;
+
+    width: 80%;
+    margin: 50px auto;
+}
+
+.button {
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    width: 100%;
+    height: 100%;
+    font-size: 3em;
+
+    cursor: pointer;
+
+    border-radius: 10px;
+    border: solid var(--color-background1) 2px;
+
+    transition: all .3s ease;
+}
+
+.button:hover, .button:active {
+    border: solid var(--color-front2) 2px;
+    background-color: var(--color-background3);
+    color: var(--color-front2);
+}
+
+.button.stop {
+    font-size: 1em;
+}
+
+.button p {
+    position: relative;
+    top: 70%;
+}
+
+.button.main {
+    width: 80%;
+    margin: 20px auto;
+    display: block;
+    font-size: 1.2em;
+    padding: 5px 0;
+}
+
+input {
+    display: inline-block;
+    text-align: center;
+    margin: auto;
+    width: 100%;
+    color: red;
+}
+
+.main-container {
+    width: 80%;
+    margin: 50px auto;
+}
+
+.main-container h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.side-container {
+    display: grid;
+    grid-template-columns: 4fr 1fr;
+    gap: 20px 10px;
+    width: 80%;
+    height: auto;
+    margin: auto;
+}
+
+.side-container .button {
+    margin: 0;
+    width: 100%;
+    display: inline-table
+}
+
+
+.side-container-half {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 10px;
+    width: 80%;
+    height: auto;
+    margin: auto;
+}
+
+.small {
+    font-size: .75em;
+    margin-left: 20px;
+}
+
+.closer {
+    height: 200px;
+}
+
+.section {
+    text-align: text;
+    width: 80%;
+    margin: auto;
+}
+
+.section h1, h2, h3 {
+    text-align: center;
+}
+
+input {
+    text-align: left;
+    color: var(--color-background1);
+    background-color: var(--color-front1);
+    padding: 5px 10px;
+    
+    border-radius: 10px;
+    border: solid var(--color-background1) 2px;
+    min-height: 25px;
+    width: 80%;
+}

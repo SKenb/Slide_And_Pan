@@ -1,4 +1,5 @@
 import sys
+import glob
 import serial
 
 def serialPortList():
@@ -19,7 +20,6 @@ def serialPortList():
     else:
         raise EnvironmentError('Unsupported platform')
 
-    result = []
     for port in ports:
         try:
             s = serial.Serial(port)

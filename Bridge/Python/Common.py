@@ -1,5 +1,10 @@
-def getVersionJsonEndpoint():
-    return "https://sebastianknoll.net/photo/media/list"
+import urllib
+
+def getFirmwareEndpoint(firmwareName, firmwareKey):
+    return "https://sebastianknoll.net/api/?api=Slider%20Firmware%20Manager&id=3&token=6f40bgi8wsf3h1wcp0p0xc430epaqv561aedizuu4&firmware=" + urllib.parse.quote(str(firmwareName)) + "&fk=" + urllib.parse.quote(str(firmwareKey))
+
+def getFirmwareListEndpoint():
+    return "https://sebastianknoll.net/api/?api=Slider%20Firmware%20Manager&id=3&token=6f40bgi8wsf3h1wcp0p0xc430epaqv561aedizuu4&list=1"
 
 def getMockVersionJson():
 

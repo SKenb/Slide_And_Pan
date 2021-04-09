@@ -2,10 +2,15 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 
 from SerialFunctions import serialPortList
-from Common import getVersionJsonEndpoint, getMockVersionJson
+from Common import getFirmwareListEndpoint, getMockVersionJson, getFirmwareEndpoint
 
+import os
 import time
-import urllib.request, json 
+import urllib.request, json
+
+firmwareToProgramm = None
+frimwareKey = None
+serialPortToUse = None
 
 class Ui_MainWindow(object):
 
@@ -169,6 +174,7 @@ class Ui_MainWindow(object):
     def changeUi(self):
 
         self.comboBoxVersion.currentIndexChanged.connect(self.changeFirmwareInfoText)
+        self.pushButtonStart.clicked.connect(self.startProgrammSlider)
 
     def changeFirmwareInfoText(self, index):
 
@@ -188,14 +194,17 @@ class Ui_MainWindow(object):
                 self.labelFirmwareReleaseDate.setText(self.knownFirmwares[index]["ReleaseDate"])
                 self.labelFirmwareNotes.setText(self.knownFirmwares[index]["Notes"])
 
-                if self.knownFirmwares[index]["IsKeyRequired"] >= 1:
+                isKeyRequired = self.knownFirmwares[index]["IsKeyRequired"]
+                if isKeyRequired is not None and int(isKeyRequired)  >= 1:
                     self.lineEditFirmwareKey.setEnabled(True)
                     self.lineEditFirmwareKey.setText("Firmware-Key")
                 else:
                     self.lineEditFirmwareKey.setEnabled(False)
                     self.lineEditFirmwareKey.setText("")
 
-            except Exception:
+            except Exception as e: 
+
+                print(self.knownFirmwares[index])
 
                 self.setStatus("Error occurred during Firmware info update :/")
 
@@ -247,6 +256,27 @@ class Ui_MainWindow(object):
         # Final resets
         self.updateAvailableFirmwaresThread.finished.connect(lambda: self.setStatus("Updated available Firmwares :)"))
 
+    def startProgrammSlider(self):
+        global firmwareToProgramm, serialPortToUse, frimwareKey
+
+        firmwareToProgramm = self.knownFirmwares[self.comboBoxVersion.currentIndex()]
+        serialPortToUse = self.comboBoxSerial.currentText()
+        frimwareKey = self.lineEditFirmwareKey.text()
+
+        self.programmSliderThread = QThread()
+        self.programmSliderWorker = ProgramSliderWorker()
+        self.programmSliderWorker.moveToThread(self.programmSliderThread)
+
+        self.programmSliderThread.started.connect(self.programmSliderWorker.run)
+        self.programmSliderWorker.finished.connect(self.programmSliderThread.quit)
+        self.programmSliderWorker.finished.connect(self.programmSliderWorker.deleteLater)
+        self.programmSliderThread.finished.connect(self.programmSliderThread.deleteLater)
+
+        self.programmSliderWorker.errorUpdate.connect(lambda error: self.setStatus(error))
+        self.programmSliderWorker.statusUpdate.connect(lambda status: self.setStatus(status))
+
+        self.programmSliderThread.start()
+
 
 
 class UpdateSerialPortsWorker(QObject):
@@ -258,16 +288,16 @@ class UpdateSerialPortsWorker(QObject):
     def run(self):
         self.statusUpdate.emit("Search serial ports...")
 
-        while True:
+        #while True:
 
-            for port in serialPortList():
-                if port not in self.knownPorts:
-                    self.statusUpdate.emit("Found new port: " + port)
-                    self.progress.emit(port)
+        for port in serialPortList():
+            if port not in self.knownPorts:
+                self.statusUpdate.emit("Found new port: " + port)
+                self.progress.emit(port)
 
-                    self.knownPorts.append(port)
+                self.knownPorts.append(port)
 
-            time.sleep(2)
+        #    time.sleep(2)
 
         self.finished.emit()
 
@@ -282,10 +312,10 @@ class UpdateAvailableFirmwaresWorker(QObject):
 
         while True:
 
-            with urllib.request.urlopen(getVersionJsonEndpoint()) as url:
-                #data = json.loads(url.read().decode())
+            with urllib.request.urlopen(getFirmwareListEndpoint()) as url:
+                data = json.loads(url.read().decode())
 
-                data = json.loads(getMockVersionJson())
+                #data = json.loads(getMockVersionJson())
 
                 for firmware in data["Firmwares"]:
                     firmwareName = firmware["Name"]
@@ -298,5 +328,58 @@ class UpdateAvailableFirmwaresWorker(QObject):
 
 
             time.sleep(20)
+
+        self.finished.emit()
+
+class ProgramSliderWorker(QObject):
+    finished = pyqtSignal()
+    statusUpdate = pyqtSignal(object)
+    errorUpdate = pyqtSignal(object)
+
+    def run(self):
+        self.statusUpdate.emit("Start programming...")
+
+        localFilename = './.firmware.bin'
+        # Clean update
+        self.statusUpdate.emit("Clean for update")
+        if os.path.exists(localFilename):
+            os.remove(localFilename)
+        
+        # Download firmware
+        self.statusUpdate.emit("Download requested firmware")
+
+        filedata = urllib.request.urlopen(getFirmwareEndpoint(firmwareToProgramm["Name"], frimwareKey))
+        firmwareData = filedata.read()
+
+        if len(firmwareData) <= 2000:
+            if "Error" in str(firmwareData):
+                errorData = str(firmwareData).replace('b', '').replace('\'', '')
+                errorData = json.loads(errorData)
+                self.errorUpdate.emit(errorData["Error"])
+                self.finished.emit()
+                return
+            else:
+                self.errorUpdate.emit("No valid firmware received :0")
+                self.finished.emit()
+                return
+        
+        with open(localFilename, 'wb') as f:
+            f.write(firmwareData)
+
+
+        # Program
+        self.statusUpdate.emit("Program the Slider")
+
+        result = os.popen("esptool.py --chip auto --port " + serialPortToUse + " --connect-attempts 3 write_flash -fm dio -fs 16MB 0x00000 " + localFilename).read()
+
+        # Clean update
+        self.statusUpdate.emit("Clean up")
+        if os.path.exists(localFilename):
+            os.remove(localFilename)
+
+        if("Hash of data verified" in result):
+            self.statusUpdate.emit("Programming finished :D")
+        else:
+            self.errorUpdate.emit("Something wen't wrong when programming the Slider :/")
 
         self.finished.emit()
